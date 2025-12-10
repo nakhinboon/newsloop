@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "home": "บล็อก",
+    "blog": "บทความ",
+    "search": "ค้นหา",
+    "news": "ข่าว"
+  },
+  "common": {
+    "home": "หน้าแรก",
+    "blog": "บล็อก",
+    "search": "ค้นหา",
+    "categories": "หมวดหมู่",
+    "tags": "แท็ก",
+    "about": "เกี่ยวกับ",
+    "contact": "ติดต่อ"
+  },
+  "navigation": {
+    "menu": "เมนู",
+    "close": "ปิด",
+    "back": "กลับ",
+    "next": "ถัดไป",
+    "previous": "ก่อนหน้า"
+  },
+  "blog": {
+    "readMore": "อ่านเพิ่มเติม",
+    "readingTime": "อ่าน {minutes} นาที",
+    "publishedOn": "เผยแพร่เมื่อ {date}",
+    "by": "โดย",
+    "relatedPosts": "บทความที่เกี่ยวข้อง",
+    "noPostsFound": "ไม่พบบทความ",
+    "allPosts": "บทความทั้งหมด",
+    "filterByCategory": "กรองตามหมวดหมู่",
+    "filterByTag": "กรองตามแท็ก",
+    "clearFilter": "ล้างตัวกรอง",
+    "showingResultsFor": "แสดงผลลัพธ์สำหรับ: {query}",
+    "noResults": "ไม่พบผลลัพธ์สำหรับ \"{query}\"",
+    "tryDifferentSearch": "ลองค้นหาด้วยคำอื่น",
+    "subcategories": "หมวดหมู่ย่อย"
+  },
+  "search": {
+    "placeholder": "ค้นหาบทความ...",
+    "submit": "ค้นหา",
+    "results": "{count} ผลลัพธ์",
+    "noResults": "ไม่พบผลลัพธ์"
+  },
+  "pagination": {
+    "page": "หน้า {current} จาก {total}",
+    "first": "แรก",
+    "last": "สุดท้าย",
+    "next": "ถัดไป",
+    "previous": "ก่อนหน้า"
+  },
+  "locale": {
+    "switchLanguage": "เปลี่ยนภาษา",
+    "currentLanguage": "ภาษาปัจจุบัน: {language}",
+    "fallbackNotice": "เนื้อหานี้ไม่มีในภาษาของคุณ แสดงใน {fallbackLanguage}"
+  },
+  "theme": {
+    "toggle": "สลับธีม",
+    "light": "สว่าง",
+    "dark": "มืด",
+    "system": "ระบบ"
+  },
+  "footer": {
+    "copyright": "© {year} สงวนลิขสิทธิ์",
+    "poweredBy": "ขับเคลื่อนโดย Next.js",
+    "rights": "สงวนลิขสิทธิ์"
+  },
+  "news": {
+    "title": "ข่าว",
+    "subtitle": "ติดตามข่าวสารล่าสุดจากทั่วโลก",
+    "description": "เรียกดูบทความข่าวล่าสุดจากแหล่งข่าวต่างๆ",
+    "unavailable": "บริการข่าวไม่พร้อมใช้งานในขณะนี้ กรุณาลองใหม่อีกครั้ง",
+    "searchPlaceholder": "ค้นหาข่าว...",
+    "searchResults": "พบ {count} ผลลัพธ์สำหรับ \"{query}\"",
+    "noSearchResults": "ไม่พบบทความข่าวสำหรับการค้นหาของคุณ",
+    "noNews": "ไม่มีบทความข่าวในขณะนี้",
+    "browseAll": "ดูข่าวทั้งหมด",
+    "categoryDescription": "ข่าว{category}ล่าสุดและอัปเดต",
+    "categorySubtitle": "แสดง {count} บทความใน{category}",
+    "noCategoryNews": "ไม่พบบทความข่าวใน{category}",
+    "readFullArticle": "อ่านบทความเต็ม",
+    "filterBy": "กรองตาม:",
+    "clearFilter": "ล้างตัวกรอง",
+    "categories": {
+      "general": "ทั่วไป",
+      "business": "ธุรกิจ",
+      "technology": "เทคโนโลยี",
+      "entertainment": "บันเทิง",
+      "health": "สุขภาพ",
+      "science": "วิทยาศาสตร์",
+      "sports": "กีฬา"
+    }
+  }
+}

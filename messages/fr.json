@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "home": "Blog",
+    "blog": "Articles",
+    "search": "Rechercher",
+    "news": "Actualités"
+  },
+  "common": {
+    "home": "Accueil",
+    "blog": "Blog",
+    "search": "Rechercher",
+    "categories": "Catégories",
+    "tags": "Tags",
+    "about": "À propos",
+    "contact": "Contact"
+  },
+  "navigation": {
+    "menu": "Menu",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent"
+  },
+  "blog": {
+    "readMore": "Lire la suite",
+    "readingTime": "{minutes} min de lecture",
+    "publishedOn": "Publié le {date}",
+    "by": "par",
+    "relatedPosts": "Articles connexes",
+    "noPostsFound": "Aucun article trouvé",
+    "allPosts": "Tous les articles",
+    "filterByCategory": "Filtrer par catégorie",
+    "filterByTag": "Filtrer par tag",
+    "clearFilter": "Effacer le filtre",
+    "showingResultsFor": "Résultats pour : {query}",
+    "noResults": "Aucun résultat trouvé pour \"{query}\"",
+    "tryDifferentSearch": "Essayez un autre terme de recherche",
+    "subcategories": "Sous-catégories"
+  },
+  "search": {
+    "placeholder": "Rechercher des articles...",
+    "submit": "Rechercher",
+    "results": "{count} résultats",
+    "noResults": "Aucun résultat trouvé"
+  },
+  "pagination": {
+    "page": "Page {current} sur {total}",
+    "first": "Première",
+    "last": "Dernière",
+    "next": "Suivant",
+    "previous": "Précédent"
+  },
+  "locale": {
+    "switchLanguage": "Changer de langue",
+    "currentLanguage": "Langue actuelle : {language}",
+    "fallbackNotice": "Ce contenu n'est pas disponible dans votre langue. Affichage en {fallbackLanguage}."
+  },
+  "theme": {
+    "toggle": "Changer de thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "footer": {
+    "copyright": "© {year} Tous droits réservés.",
+    "poweredBy": "Propulsé par Next.js",
+    "rights": "Tous droits réservés."
+  },
+  "news": {
+    "title": "Actualités",
+    "subtitle": "Restez informé des dernières nouvelles du monde entier",
+    "description": "Parcourez les derniers articles d'actualités de diverses sources",
+    "unavailable": "Le service d'actualités est actuellement indisponible. Veuillez réessayer plus tard.",
+    "searchPlaceholder": "Rechercher des actualités...",
+    "searchResults": "{count} résultats trouvés pour \"{query}\"",
+    "noSearchResults": "Aucun article d'actualités trouvé pour votre recherche.",
+    "noNews": "Aucun article d'actualités disponible pour le moment.",
+    "browseAll": "Parcourir toutes les actualités",
+    "categoryDescription": "Dernières actualités et mises à jour {category}",
+    "categorySubtitle": "Affichage de {count} articles dans {category}",
+    "noCategoryNews": "Aucun article d'actualités trouvé dans {category}.",
+    "readFullArticle": "Lire l'article complet",
+    "filterBy": "Filtrer par :",
+    "clearFilter": "Effacer le filtre",
+    "categories": {
+      "general": "Général",
+      "business": "Affaires",
+      "technology": "Technologie",
+      "entertainment": "Divertissement",
+      "health": "Santé",
+      "science": "Science",
+      "sports": "Sports"
+    }
+  }
+}

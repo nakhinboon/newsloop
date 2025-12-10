@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "home": "Blog",
+    "blog": "Posts",
+    "search": "Search",
+    "news": "News"
+  },
+  "common": {
+    "home": "Home",
+    "blog": "Blog",
+    "search": "Search",
+    "categories": "Categories",
+    "tags": "Tags",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "navigation": {
+    "menu": "Menu",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "blog": {
+    "readMore": "Read more",
+    "readingTime": "{minutes} min read",
+    "publishedOn": "Published on {date}",
+    "by": "by",
+    "relatedPosts": "Related Posts",
+    "noPostsFound": "No posts found",
+    "allPosts": "All Posts",
+    "filterByCategory": "Filter by category",
+    "filterByTag": "Filter by tag",
+    "clearFilter": "Clear filter",
+    "showingResultsFor": "Showing results for: {query}",
+    "noResults": "No results found for \"{query}\"",
+    "tryDifferentSearch": "Try a different search term",
+    "subcategories": "Subcategories"
+  },
+  "search": {
+    "placeholder": "Search posts...",
+    "submit": "Search",
+    "results": "{count} results",
+    "noResults": "No results found"
+  },
+  "pagination": {
+    "page": "Page {current} of {total}",
+    "first": "First",
+    "last": "Last",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "locale": {
+    "switchLanguage": "Switch language",
+    "currentLanguage": "Current language: {language}",
+    "fallbackNotice": "This content is not available in your language. Showing in {fallbackLanguage}."
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "footer": {
+    "copyright": "© {year} All rights reserved.",
+    "poweredBy": "Powered by Next.js",
+    "rights": "All rights reserved."
+  },
+  "news": {
+    "title": "News",
+    "subtitle": "Stay updated with the latest news from around the world",
+    "description": "Browse the latest news articles from various sources",
+    "unavailable": "News service is currently unavailable. Please try again later.",
+    "searchPlaceholder": "Search news...",
+    "searchResults": "Found {count} results for \"{query}\"",
+    "noSearchResults": "No news articles found for your search.",
+    "noNews": "No news articles available at the moment.",
+    "browseAll": "Browse all news",
+    "categoryDescription": "Latest {category} news and updates",
+    "categorySubtitle": "Showing {count} articles in {category}",
+    "noCategoryNews": "No news articles found in {category}.",
+    "readFullArticle": "Read full article",
+    "filterBy": "Filter by:",
+    "clearFilter": "Clear filter",
+    "categories": {
+      "general": "General",
+      "business": "Business",
+      "technology": "Technology",
+      "entertainment": "Entertainment",
+      "health": "Health",
+      "science": "Science",
+      "sports": "Sports"
+    }
+  }
+}

@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User model for admin users (synced with Clerk)
+model User {
+  id        String   @id // Clerk user ID
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  imageUrl  String?
+  role      Role     @default(EDITOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts     Post[]
+  media     Media[]
+  activityLogs ActivityLog[]
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+// Activity Log for tracking admin actions
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String   // e.g., CREATE_POST, UPDATE_POST, LOGIN
+  entityType String  // e.g., POST, USER, MEDIA
+  entityId  String?
+  details   String?  // JSON string or description
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  ipAddress String?
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+}
+
+// Post model for blog posts
+model Post {
+  id           String     @id @default(cuid())
+  slug         String
+  locale       String     @default("en")
+  title        String
+  content      String     @db.Text
+  excerpt      String?
+  status       PostStatus @default(DRAFT)
+  publishedAt  DateTime?
+  scheduledAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  readingTime  Int        @default(0)
+  featured     Boolean    @default(false)
+
+  // Relations
+  authorId   String
+  author     User       @relation(fields: [authorId], references: [id])
+  categoryId String?
+  category   Category?  @relation(fields: [categoryId], references: [id])
+  tags       PostTag[]
+  pageViews  PageView[]
+  postMedia  PostMedia[]
+
+  @@unique([slug, locale])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([categoryId])
+}
+
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+}
+
+// Category model for post categorization with hierarchical support
+model Category {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  depth       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  posts Post[]
+
+  @@unique([parentId, name])
+  @@index([parentId])
+}
+
+// Tag model for post tagging
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  posts PostTag[]
+}
+
+// Many-to-many relation between Post and Tag
+model PostTag {
+  postId String
+  tagId  String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@index([tagId])
+}
+
+// MediaFolder model for organizing media
+model MediaFolder {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  media Media[]
+}
+
+// Media model for uploaded images
+model Media {
+  id           String   @id @default(cuid())
+  fileId       String   @unique // ImageKit file ID
+  filename     String
+  url          String
+  thumbnailUrl String?
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  uploadedAt   DateTime @default(now())
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  
+  // Folder relation
+  folderId     String?
+  folder       MediaFolder? @relation(fields: [folderId], references: [id])
+  
+  // Post media relation
+  postMedia    PostMedia[]
+
+  @@index([uploadedById])
+  @@index([folderId])
+}
+
+// PostMedia model for many-to-many relation between Post and Media
+model PostMedia {
+  id        String   @id @default(cuid())
+  postId    String
+  mediaId   String
+  isCover   Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, mediaId])
+  @@index([postId])
+  @@index([mediaId])
+}
+
+// PageView model for analytics
+model PageView {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now())
+  userAgent String?
+  referer   String?
+  country   String?
+
+  @@index([postId])
+  @@index([viewedAt])
+}
