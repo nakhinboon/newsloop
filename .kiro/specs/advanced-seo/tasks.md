@@ -1,0 +1,157 @@
+# Implementation Plan
+
+- [ ] 1. Set up SEO module structure and configuration
+  - [ ] 1.1 Create SEO configuration module with environment variable loading
+    - Create `lib/seo/config.ts` with `getSEOConfig()` and `validateSEOConfig()` functions
+    - Load from `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SITE_NAME`, `TWITTER_HANDLE`, `FACEBOOK_APP_ID`
+    - Default site URL to `https://newsrefac.com`, site name to "NewsRefac"
+    - Implement sensible defaults for missing values
+    - _Requirements: 10.1, 10.4_
+  - [ ]* 1.2 Write property test for configuration defaults
+    - **Property 23: Configuration defaults**
+    - **Validates: Requirements 10.4**
+  - [ ] 1.3 Create barrel export for SEO modules
+    - Create `lib/seo/index.ts` exporting all SEO utilities
+    - Update existing `lib/seo.ts` to re-export from new module structure
+    - _Requirements: 10.1_
+
+- [ ] 2. Implement structured data generators
+  - [ ] 2.1 Create Article JSON-LD generator
+    - Create `lib/seo/structured-data.ts` with `generateArticleSchema()` function
+    - Include headline, description, author, dates, publisher, wordCount, timeRequired
+    - Handle optional image, articleSection, keywords fields
+    - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
+  - [ ]* 2.2 Write property tests for Article JSON-LD
+    - **Property 1: Article JSON-LD required fields**
+    - **Property 2: Article JSON-LD image inclusion**
+    - **Property 3: Article JSON-LD category mapping**
+    - **Property 4: Article JSON-LD keywords format**
+    - **Property 5: Article JSON-LD word count and duration**
+    - **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5**
+  - [ ] 2.3 Create Organization and WebSite JSON-LD generators
+    - Add `generateOrganizationSchema()` with name, url, logo, sameAs
+    - Add `generateWebSiteSchema()` with SearchAction and inLanguage
+    - _Requirements: 2.1, 2.2, 2.3, 2.4_
+  - [ ]* 2.4 Write property tests for Organization and WebSite JSON-LD
+    - **Property 6: WebSite JSON-LD locale matching**
+    - **Property 7: Organization JSON-LD social links**
+    - **Property 21: Configuration site name usage**
+    - **Validates: Requirements 2.3, 2.4, 10.2**
+  - [ ] 2.5 Create BreadcrumbList JSON-LD generator
+    - Add `generateBreadcrumbSchema()` with sequential positions and full URLs
+    - _Requirements: 3.1, 3.2, 3.3, 3.4_
+  - [ ]* 2.6 Write property test for BreadcrumbList JSON-LD
+    - **Property 8: BreadcrumbList structure validity**
+    - **Validates: Requirements 3.1, 3.2, 3.3, 3.4**
+
+- [ ] 3. Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 4. Implement content parsers and FAQ/HowTo schemas
+  - [ ] 4.1 Create content parser utilities
+    - Create `lib/seo/content-parser.ts` with HTML parsing functions
+    - Implement `calculateWordCount()`, `calculateReadingTime()`, `formatDuration()`
+    - Implement `extractFAQContent()` to parse Q&A patterns from HTML
+    - Implement `extractHowToContent()` to parse step-by-step instructions
+    - _Requirements: 1.5, 9.1, 9.2_
+  - [ ] 4.2 Create FAQ and HowTo JSON-LD generators
+    - Add `generateFAQSchema()` with Question/Answer entities
+    - Add `generateHowToSchema()` with HowToStep entities
+    - _Requirements: 9.1, 9.2, 9.3, 9.4_
+  - [ ]* 4.3 Write property tests for FAQ and HowTo JSON-LD
+    - **Property 19: FAQ JSON-LD structure**
+    - **Property 20: HowTo JSON-LD structure**
+    - **Validates: Requirements 9.1, 9.2, 9.3, 9.4**
+
+- [ ] 5. Implement meta tag generators
+  - [ ] 5.1 Create Open Graph meta tag generator
+    - Create `lib/seo/meta-tags.ts` with `generateOpenGraphTags()` function
+    - Include og:title, og:description, og:type, og:url, og:image
+    - Handle og:locale and og:locale:alternate for multilingual content
+    - Include article-specific tags (published_time, modified_time, author, tag)
+    - _Requirements: 5.1, 5.3, 5.4, 5.5_
+  - [ ] 5.2 Create Twitter Card meta tag generator
+    - Add `generateTwitterCardTags()` function
+    - Include twitter:card, twitter:title, twitter:description, twitter:image
+    - Support twitter:site from configuration
+    - _Requirements: 5.2, 10.3_
+  - [ ]* 5.3 Write property tests for social meta tags
+    - **Property 10: Social meta tags completeness**
+    - **Property 11: OG image dimensions**
+    - **Property 12: OG locale alternates**
+    - **Property 13: Article OG tags**
+    - **Property 22: Social config usage**
+    - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 10.3**
+
+- [ ] 6. Implement canonical URL handler
+  - [ ] 6.1 Create canonical URL generator
+    - Create `lib/seo/canonical.ts` with `generateCanonicalUrl()` function
+    - Implement `stripQueryParams()` for removing non-content query params
+    - Ensure URLs use configured site URL as base
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+  - [ ]* 6.2 Write property test for canonical URLs
+    - **Property 9: Canonical URL correctness**
+    - **Validates: Requirements 4.1, 4.2, 4.3, 4.4**
+
+- [ ] 7. Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 8. Implement robots.txt generator
+  - [ ] 8.1 Create dynamic robots.txt route
+    - Create `app/robots.ts` using Next.js robots() function
+    - Disallow /dashboard and /api paths in production
+    - Disallow all paths in non-production environments
+    - Include sitemap URL
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+  - [ ]* 8.2 Write property test for robots.txt
+    - **Property 14: Robots.txt environment handling**
+    - **Validates: Requirements 6.5**
+
+- [ ] 9. Implement SEO validator
+  - [ ] 9.1 Create SEO metadata validator
+    - Create `lib/seo/validator.ts` with `validateSEOMetadata()` function
+    - Implement `validateTitleLength()` (30-60 chars)
+    - Implement `validateDescriptionLength()` (120-160 chars)
+    - Return structured validation results with errors and warnings
+    - _Requirements: 8.1, 8.2, 8.3, 8.4_
+  - [ ]* 9.2 Write property tests for SEO validation
+    - **Property 17: SEO metadata length validation**
+    - **Property 18: SEO validation error format**
+    - **Validates: Requirements 8.1, 8.2, 8.4**
+
+- [ ] 10. Enhance hreflang implementation
+  - [ ] 10.1 Update hreflang tag generation
+    - Enhance existing `components/HreflangTags.tsx` to include x-default
+    - Ensure locale-specific slugs are used correctly
+    - _Requirements: 7.1, 7.2, 7.3, 7.4_
+  - [ ]* 10.2 Write property tests for hreflang enhancements
+    - **Property 15: Hreflang completeness**
+    - **Property 16: Hreflang slug correctness**
+    - **Validates: Requirements 7.1, 7.2, 7.4**
+
+- [ ] 11. Integrate SEO components into pages
+  - [ ] 11.1 Update blog post page with enhanced SEO
+    - Update `app/[locale]/blog/[slug]/page.tsx` to use new Article JSON-LD
+    - Add BreadcrumbList JSON-LD
+    - Integrate FAQ/HowTo schema detection
+    - _Requirements: 1.1, 3.1, 9.1, 9.2_
+  - [ ] 11.2 Update homepage with Organization and WebSite schemas
+    - Update `app/[locale]/page.tsx` to include Organization JSON-LD
+    - Add WebSite JSON-LD with SearchAction
+    - _Requirements: 2.1, 2.2_
+  - [ ] 11.3 Update category pages with BreadcrumbList
+    - Update `app/[locale]/category/[category]/page.tsx` with breadcrumbs
+    - _Requirements: 3.2_
+
+- [ ] 12. Create SEO React components
+  - [ ] 12.1 Create enhanced JSON-LD components
+    - Update `components/JsonLd.tsx` with new schema components
+    - Add `OrganizationJsonLd`, `FAQJsonLd`, `HowToJsonLd` components
+    - _Requirements: 2.1, 9.1, 9.2_
+  - [ ] 12.2 Create SEO validation component for admin
+    - Create `components/admin/SEOValidator.tsx` for post editor
+    - Display validation results with errors and warnings
+    - _Requirements: 8.1, 8.2, 8.4_
+
+- [ ] 13. Final Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.

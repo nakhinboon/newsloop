@@ -43,18 +43,21 @@ export function validateClerkUserData(data: unknown): ValidatedUserData | null {
     return null;
   }
 
-  // Validate email_addresses array
-  if (!Array.isArray(userData.email_addresses) || userData.email_addresses.length === 0) {
-    return null;
+  // Extract email - may be empty for some social logins
+  let email: string | null = null;
+  if (Array.isArray(userData.email_addresses) && userData.email_addresses.length > 0) {
+    const firstEmail = userData.email_addresses[0];
+    if (firstEmail && typeof firstEmail === 'object') {
+      const emailObj = firstEmail as Record<string, unknown>;
+      if (typeof emailObj.email_address === 'string' && emailObj.email_address) {
+        email = emailObj.email_address;
+      }
+    }
   }
 
-  const firstEmail = userData.email_addresses[0];
-  if (!firstEmail || typeof firstEmail !== 'object') {
-    return null;
-  }
-
-  const emailObj = firstEmail as Record<string, unknown>;
-  if (typeof emailObj.email_address !== 'string' || !emailObj.email_address) {
+  // Email is required for our system
+  if (!email) {
+    console.warn(`User ${userData.id} has no email address, skipping sync`);
     return null;
   }
 
@@ -65,7 +68,7 @@ export function validateClerkUserData(data: unknown): ValidatedUserData | null {
 
   return {
     id: userData.id,
-    email: emailObj.email_address,
+    email,
     firstName: typeof userData.first_name === 'string' ? userData.first_name : null,
     lastName: typeof userData.last_name === 'string' ? userData.last_name : null,
     imageUrl: typeof userData.image_url === 'string' ? userData.image_url : null,

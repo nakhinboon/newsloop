@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton, useUser } from '@clerk/nextjs';
+import { UserButton } from '@clerk/nextjs';
 import {
   LayoutDashboard,
   FileText,
@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { useRole } from '@/lib/auth/RoleContext';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'editor'] },
@@ -53,14 +54,11 @@ function NavLink({ href, label, icon: Icon, isActive }: {
 
 function SidebarContent() {
   const pathname = usePathname();
-  const { user } = useUser();
-  const role = user?.publicMetadata?.role as string;
-  
-  // Role is determined server-side via lib/auth/roles.ts (including admin email override)
-  // Client-side only uses publicMetadata.role which is set by Clerk webhook
-  const userRole = role === 'admin' ? 'admin' : 'editor';
+  // Use role from server-side context (includes ADMIN_EMAIL override)
+  const role = useRole();
+  const userRole = role ?? 'editor';
 
-  const filteredItems = navItems.filter(item => item.roles.includes(userRole));
+  const filteredItems = navItems.filter((item) => item.roles.includes(userRole));
 
   return (
     <div className="flex h-full flex-col">
