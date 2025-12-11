@@ -42,11 +42,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(cached);
     }
 
-    const categories = await prisma.category.findMany({
-      where: rootOnly ? { parentId: null } : undefined,
-      include: {
-        _count: { select: { posts: { where: { status: 'PUBLISHED' } } } },
-        ...(withPosts && {
+    let transformedCategories;
+
+    if (withPosts) {
+      const categories = await prisma.category.findMany({
+        where: rootOnly ? { parentId: null } : undefined,
+        include: {
+          _count: { select: { posts: { where: { status: 'PUBLISHED' } } } },
           posts: {
             where: { status: 'PUBLISHED' },
             include: {
@@ -60,19 +62,17 @@ export async function GET(request: NextRequest) {
             orderBy: { publishedAt: 'desc' },
             take: limit,
           },
-        }),
-      },
-      orderBy: { name: 'asc' },
-    });
+        },
+        orderBy: { name: 'asc' },
+      });
 
-    const transformedCategories = categories.map((cat) => ({
-      id: cat.id,
-      name: cat.name,
-      slug: cat.slug,
-      description: cat.description,
-      postCount: cat._count.posts,
-      ...(withPosts && {
-        posts: cat.posts?.map((post) => ({
+      transformedCategories = categories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        description: cat.description,
+        postCount: cat._count.posts,
+        posts: cat.posts.map((post) => ({
           id: post.id,
           slug: post.slug,
           locale: post.locale,
@@ -86,8 +86,24 @@ export async function GET(request: NextRequest) {
           },
           image: post.postMedia[0]?.media?.url || null,
         })),
-      }),
-    }));
+      }));
+    } else {
+      const categories = await prisma.category.findMany({
+        where: rootOnly ? { parentId: null } : undefined,
+        include: {
+          _count: { select: { posts: { where: { status: 'PUBLISHED' } } } },
+        },
+        orderBy: { name: 'asc' },
+      });
+
+      transformedCategories = categories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        description: cat.description,
+        postCount: cat._count.posts,
+      }));
+    }
 
     await postCache.set(cacheKey, transformedCategories, 300);
 

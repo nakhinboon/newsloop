@@ -732,6 +732,11 @@ export const categoryService = {
           include: {
             author: true,
             category: true,
+            postMedia: {
+              where: { isCover: true },
+              include: { media: { select: { url: true, thumbnailUrl: true } } },
+              take: 1,
+            },
           },
         },
       },
@@ -760,7 +765,7 @@ export const categoryService = {
           avatar: p.author.imageUrl,
         },
         category: p.category ? { name: p.category.name, slug: p.category.slug } : null,
-        image: p.coverImage,
+        image: p.postMedia[0]?.media?.url || null,
       })),
     }));
   },

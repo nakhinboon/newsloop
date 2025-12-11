@@ -89,10 +89,10 @@ export function CoverImageSelector({
           )}
         </div>
 
-        {/* Quick Actions (if not hovering or for mobile) */}
-        {!coverImage && (
-          <div className="flex flex-col gap-3">
-             <Button
+        {/* Quick Actions */}
+        <div className="flex flex-col gap-3">
+          {!coverImage && (
+            <Button
               type="button"
               variant="outline"
               className="w-full"
@@ -101,40 +101,40 @@ export function CoverImageSelector({
               <ImagePlus className="mr-2 h-4 w-4" />
               Browse Library
             </Button>
+          )}
 
-            {/* Quick select from attached media */}
-            {availableMedia.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Quick select from attached:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {availableMedia.slice(0, 5).map((media) => (
-                    <button
-                      key={media.id}
-                      type="button"
-                      onClick={() => handleSelectFromGallery(media.id)}
-                      className={`relative h-12 w-12 overflow-hidden rounded-md border-2 transition-all ${
-                        coverImage?.id === media.id
-                          ? 'border-primary ring-2 ring-primary ring-offset-1'
-                          : 'border-transparent hover:border-muted-foreground/50'
-                      }`}
-                      title={media.filename}
-                    >
-                      <Image
-                        src={media.thumbnailUrl || media.url}
-                        alt={media.filename}
-                        fill
-                        className="object-cover"
-                        sizes="48px"
-                      />
-                    </button>
-                  ))}
-                </div>
+          {/* Quick select from attached media */}
+          {availableMedia.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                Quick select from attached:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {availableMedia.slice(0, 5).map((media) => (
+                  <button
+                    key={media.id}
+                    type="button"
+                    onClick={() => handleSelectFromGallery(media.id)}
+                    className={`relative h-12 w-12 overflow-hidden rounded-md border-2 transition-all ${
+                      coverImage?.id === media.id
+                        ? 'border-primary ring-2 ring-primary ring-offset-1'
+                        : 'border-transparent hover:border-muted-foreground/50'
+                    }`}
+                    title={media.filename}
+                  >
+                    <Image
+                      src={media.thumbnailUrl || media.url}
+                      alt={media.filename}
+                      fill
+                      className="object-cover"
+                      sizes="48px"
+                    />
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       <MediaPickerDialog

@@ -10,6 +10,7 @@ export type ActivityAction =
   | 'UPDATE_CATEGORY'
   | 'DELETE_CATEGORY'
   | 'UPLOAD_MEDIA'
+  | 'RENAME_MEDIA'
   | 'DELETE_MEDIA'
   | 'UPDATE_USER'
   | 'DELETE_USER'

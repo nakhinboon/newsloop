@@ -248,7 +248,7 @@ export async function ensureUserExists(user: ClerkUser): Promise<void> {
 
   if (!dbUser) {
     // Map role
-    let role = Role.EDITOR; // Default
+    let role: Role = Role.EDITOR; // Default
     if (user.publicMetadata?.role === 'admin') {
       role = Role.ADMIN;
     }
