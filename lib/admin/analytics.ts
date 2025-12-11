@@ -199,9 +199,15 @@ export const analyticsService = {
   },
 
   /**
-   * Get views over time for all posts
+   * Get views over time for all posts (cached)
    */
   async getViewsOverTime(dateRange: DateRange): Promise<{ date: string; views: number }[]> {
+    const days = Math.ceil((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Try cache first
+    const cached = await analyticsCache.getCachedViewsOverTime(days);
+    if (cached) return cached;
+
     const views = await prisma.pageView.groupBy({
       by: ['viewedAt'],
       where: {
@@ -221,10 +227,15 @@ export const analyticsService = {
       dateMap.set(dateStr, (dateMap.get(dateStr) || 0) + view._count);
     }
 
-    return Array.from(dateMap.entries()).map(([date, views]) => ({
+    const result = Array.from(dateMap.entries()).map(([date, views]) => ({
       date,
       views,
     }));
+
+    // Cache the result
+    await analyticsCache.setCachedViewsOverTime(days, result);
+
+    return result;
   },
 
   /**
@@ -237,6 +248,31 @@ export const analyticsService = {
     ]);
 
     return dbViews + bufferedViews;
+  },
+
+  /**
+   * Get posts count by locale for pie chart (cached)
+   */
+  async getPostsByLocale(): Promise<{ locale: string; count: number }[]> {
+    // Try cache first
+    const cached = await analyticsCache.getCachedPostsByLocale();
+    if (cached) return cached;
+
+    const posts = await prisma.post.groupBy({
+      by: ['locale'],
+      where: { status: 'PUBLISHED' },
+      _count: true,
+    });
+
+    const result = posts.map((p) => ({
+      locale: p.locale,
+      count: p._count,
+    }));
+
+    // Cache the result
+    await analyticsCache.setCachedPostsByLocale(result);
+
+    return result;
   },
 };
 

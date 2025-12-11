@@ -12,6 +12,7 @@ export type ActivityAction =
   | 'UPLOAD_MEDIA'
   | 'DELETE_MEDIA'
   | 'UPDATE_USER'
+  | 'DELETE_USER'
   | 'INVITE_USER';
 
 export type EntityType = 'POST' | 'CATEGORY' | 'TAG' | 'MEDIA' | 'USER' | 'SYSTEM';

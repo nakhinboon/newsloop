@@ -5,6 +5,7 @@ import {
   detectLocaleFromCookie,
   pathnameHasLocale,
 } from './lib/i18n/detection';
+import { applySecurityHeaders } from './lib/security/headers';
 
 export const LOCALE_COOKIE = 'NEXT_LOCALE';
 
@@ -36,23 +37,27 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   if (isSignUpRoute(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard/sign-in';
-    return NextResponse.redirect(url);
+    const response = NextResponse.redirect(url);
+    return applySecurityHeaders(response);
   }
 
   // Protect admin routes - require authentication
   if (isProtectedRoute(request)) {
     await auth.protect();
-    return NextResponse.next();
+    const response = NextResponse.next();
+    return applySecurityHeaders(response);
   }
 
   // Skip locale handling for static files, API routes, and admin routes
   if (isPublicAsset(pathname)) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    return applySecurityHeaders(response);
   }
 
   // Check if pathname already has a locale
   if (pathnameHasLocale(pathname)) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    return applySecurityHeaders(response);
   }
 
   // Determine locale: cookie > headers > default
@@ -66,7 +71,8 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   const url = request.nextUrl.clone();
   url.pathname = `/${locale}${pathname}`;
 
-  return NextResponse.redirect(url);
+  const response = NextResponse.redirect(url);
+  return applySecurityHeaders(response);
 });
 
 export const config = {

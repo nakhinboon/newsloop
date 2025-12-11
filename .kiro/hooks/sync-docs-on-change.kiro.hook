@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Sync Documentation",
+  "description": "Watches TypeScript source files, components, and configuration files for changes and prompts the agent to update relevant documentation in README.md or the docs folder.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.ts",
+      "**/*.tsx",
+      "prisma/schema.prisma",
+      "package.json",
+      "next.config.ts",
+      "middleware.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file has been modified. Review the changes and determine if the README.md or any documentation in the project needs to be updated to reflect these changes. Consider updating documentation for: API changes, new features, configuration changes, new components, database schema changes, or significant logic updates. If documentation updates are needed, make the appropriate changes to README.md or create/update relevant documentation files."
+  }
+}

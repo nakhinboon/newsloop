@@ -269,6 +269,29 @@ export const mediaService = {
   },
 
   /**
+   * Rename media (stored in database only, ImageKit filename unchanged)
+   */
+  async renameMedia(id: string, filename: string): Promise<Media> {
+    const media = await prisma.media.findUnique({
+      where: { id },
+    });
+
+    if (!media) {
+      throw new Error('Media not found');
+    }
+
+    return prisma.media.update({
+      where: { id },
+      data: { filename },
+      include: {
+        folder: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+  },
+
+  /**
    * Move media to a different folder
    * @requirements 5.4
    */

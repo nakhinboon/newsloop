@@ -1,19 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 import { postCache } from '@/lib/cache/posts';
+import {
+  categoriesListQuerySchema,
+  validateQuery,
+  formatValidationError,
+  MAX_LIMIT,
+} from '@/lib/security/api-schemas';
+import { validateMethod } from '@/lib/security/headers';
 
 export const dynamic = 'force-dynamic';
 
+const ALLOWED_METHODS = ['GET'] as const;
+
 /**
  * GET /api/categories - Get all categories with post counts
+ * Requirements: 4.3, 5.4, 8.1 - Pagination limit enforcement, method validation, Zod validation
  */
 export async function GET(request: NextRequest) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(request, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
   try {
     const { searchParams } = new URL(request.url);
-    const withPosts = searchParams.get('withPosts') === 'true';
-    const limit = parseInt(searchParams.get('limit') || '10');
+    
+    // Validate query parameters with Zod schema - Requirements: 8.1, 4.3
+    const validation = validateQuery(searchParams, categoriesListQuerySchema);
+    if (!validation.success) {
+      return NextResponse.json(formatValidationError(validation), { status: 400 });
+    }
 
-    const rootOnly = searchParams.get('rootOnly') !== 'false';
+    const { withPosts, limit: requestedLimit, rootOnly } = validation.data!;
+    
+    // Enforce pagination limit - Requirements: 4.3
+    const limit = Math.min(requestedLimit, MAX_LIMIT);
+    
     const cacheKey = `categories:public:${withPosts}:${limit}:${rootOnly}`;
     
     const cached = await postCache.get(cacheKey);

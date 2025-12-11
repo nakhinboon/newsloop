@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { verifyEditorRole } from '@/lib/auth/roles';
 import { mediaService } from '@/lib/admin/media';
+import { validateMethod, createUnauthorizedResponse, createForbiddenResponse } from '@/lib/security/headers';
+import {
+  moveMediaToFolderSchema,
+  validateBody,
+  formatValidationError,
+} from '@/lib/security/api-schemas';
+
+const ALLOWED_METHODS = ['PATCH'] as const;
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -8,31 +16,37 @@ interface RouteParams {
 
 /**
  * PATCH /api/admin/media/[id]/folder - Move media to a different folder
- * Requirements: 5.4
+ * Requirements: 1.1, 1.2, 5.4, 7.2, 8.1 - Role verification, method validation, consistent auth error messages, Zod validation
  */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(request, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
+
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Verify editor role - Requirements: 1.1, 1.2, 1.4
+    await verifyEditorRole();
 
     const { id } = await params;
     const body = await request.json();
-    const { folderId } = body;
 
-    // folderId can be null to remove from folder
-    if (folderId !== null && folderId !== undefined && typeof folderId !== 'string') {
-      return NextResponse.json(
-        { error: 'Invalid folder ID' },
-        { status: 400 }
-      );
+    // Validate input with Zod schema - Requirements: 8.1
+    const validation = validateBody(body, moveMediaToFolderSchema);
+    if (!validation.success) {
+      return NextResponse.json(formatValidationError(validation), { status: 400 });
     }
 
-    const media = await mediaService.moveMediaToFolder(id, folderId ?? null);
+    const { folderId } = validation.data!;
+    const media = await mediaService.moveMediaToFolder(id, folderId);
     return NextResponse.json(media);
   } catch (error) {
     if (error instanceof Error) {
+      if (error.message === 'Authentication required') {
+        return createUnauthorizedResponse();
+      }
+      if (error.message === 'Editor role required') {
+        return createForbiddenResponse();
+      }
       if (error.message.includes('not found')) {
         return NextResponse.json({ error: error.message }, { status: 404 });
       }

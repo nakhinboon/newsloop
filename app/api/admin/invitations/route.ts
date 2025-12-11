@@ -6,13 +6,32 @@ import {
 } from '@/lib/admin/invitations';
 import { logActivity } from '@/lib/admin/logger';
 import { ensureUserExists } from '@/lib/admin/users';
+import { applyRateLimit } from '@/lib/security/rate-limit';
+import { validateMethod, createUnauthorizedResponse, createForbiddenResponse } from '@/lib/security/headers';
+import {
+  createInvitationSchema,
+  validateBody,
+  formatValidationError,
+} from '@/lib/security/api-schemas';
+
+const ALLOWED_METHODS = ['GET', 'POST'] as const;
 
 /**
  * GET /api/admin/invitations
  * List all pending invitations
+ * Requirements: 4.1, 5.4 - Rate limiting applied, method validation
  */
-export async function GET() {
+export async function GET(request: Request) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(request, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
   try {
+    // Apply rate limiting for admin endpoints
+    const rateLimitResult = await applyRateLimit(request, 'ADMIN');
+    if (rateLimitResult) {
+      return rateLimitResult.response;
+    }
+
     await verifyAdminRole();
     
     const invitations = await listPendingInvitations();
@@ -21,10 +40,10 @@ export async function GET() {
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
-        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+        return createUnauthorizedResponse();
       }
       if (error.message === 'Admin role required') {
-        return NextResponse.json({ error: 'Admin role required' }, { status: 403 });
+        return createForbiddenResponse();
       }
     }
     console.error('Error listing invitations:', error);
@@ -35,29 +54,32 @@ export async function GET() {
 /**
  * POST /api/admin/invitations
  * Create a new invitation
+ * Requirements: 4.1, 5.4 - Rate limiting applied, method validation, 8.1 - Zod schema validation
  */
 export async function POST(request: Request) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(request, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
+
   try {
+    // Apply rate limiting for admin endpoints
+    const rateLimitResult = await applyRateLimit(request, 'ADMIN');
+    if (rateLimitResult) {
+      return rateLimitResult.response;
+    }
+
     const user = await verifyAdminRole();
     await ensureUserExists(user);
     
     const body = await request.json();
-    const { email, role } = body;
-
-    if (!email || !role) {
-      return NextResponse.json(
-        { error: 'Email and role are required' },
-        { status: 400 }
-      );
+    
+    // Validate input with Zod schema - Requirements: 8.1
+    const validation = validateBody(body, createInvitationSchema);
+    if (!validation.success) {
+      return NextResponse.json(formatValidationError(validation), { status: 400 });
     }
 
-    if (role !== 'ADMIN' && role !== 'EDITOR') {
-      return NextResponse.json(
-        { error: 'Role must be ADMIN or EDITOR' },
-        { status: 400 }
-      );
-    }
-
+    const { email, role } = validation.data!;
     const invitation = await createInvitation({ email, role });
 
     await logActivity({
@@ -72,10 +94,10 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === 'Authentication required') {
-        return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+        return createUnauthorizedResponse();
       }
       if (error.message === 'Admin role required') {
-        return NextResponse.json({ error: 'Admin role required' }, { status: 403 });
+        return createForbiddenResponse();
       }
       if (error.message === 'Invalid email format') {
         return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });

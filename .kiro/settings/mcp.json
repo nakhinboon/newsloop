@@ -4,7 +4,7 @@
       "command": "uvx",
       "args": ["mcp-server-fetch"],
       "env": {},
-      "disabled": true,
+      // "disabled": true,
       "autoApprove": []
     },
     "shadcn-ui": {
@@ -14,6 +14,9 @@
         "mcp"
       ],
       "env": {}
+    },
+    "vercel": {
+      "url": "https://mcp.vercel.com"
     }
   }
 }

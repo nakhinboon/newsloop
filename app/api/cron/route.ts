@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyticsService } from '@/lib/admin/analytics';
 import { adminPostService } from '@/lib/admin/posts';
+import { validateMethod } from '@/lib/security/headers';
 
 // Vercel Cron secret for authentication
 const CRON_SECRET = process.env.CRON_SECRET;
 
+const ALLOWED_METHODS = ['GET'] as const;
+
+/**
+ * GET /api/cron - Process scheduled tasks
+ * Requirements: 5.4 - Method validation
+ */
 export async function GET(request: NextRequest) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(request, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
   // Verify cron secret if configured
   if (CRON_SECRET) {
     const authHeader = request.headers.get('authorization');

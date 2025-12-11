@@ -2,10 +2,10 @@ import { requireEditor } from '@/lib/auth/roles';
 import { analyticsService } from '@/lib/admin/analytics';
 import { Sidebar, AdminHeader } from '@/components/admin/Sidebar';
 import { StatsCard } from '@/components/admin/StatsCard';
-import { AnalyticsChart } from '@/components/admin/AnalyticsChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Eye, TrendingUp, Users } from 'lucide-react';
 import Link from 'next/link';
+import { ViewsAreaChart, LocalePieChart } from '@/components/admin/charts';
 
 export default async function AnalyticsPage() {
   await requireEditor();
@@ -16,10 +16,13 @@ export default async function AnalyticsPage() {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   
-  const viewsOverTime = await analyticsService.getViewsOverTime({
-    start: thirtyDaysAgo,
-    end: new Date(),
-  });
+  const [viewsOverTime, postsByLocale] = await Promise.all([
+    analyticsService.getViewsOverTime({
+      start: thirtyDaysAgo,
+      end: new Date(),
+    }),
+    analyticsService.getPostsByLocale(),
+  ]);
 
   return (
     <div className="flex min-h-screen">
@@ -51,15 +54,15 @@ export default async function AnalyticsPage() {
             />
           </div>
 
-          {/* Views Chart */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Views Over Time (Last 30 Days)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AnalyticsChart data={viewsOverTime} />
-            </CardContent>
-          </Card>
+          {/* Charts Grid */}
+          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <ViewsAreaChart data={viewsOverTime} />
+            </div>
+            <div>
+              <LocalePieChart data={postsByLocale} />
+            </div>
+          </div>
 
           {/* Popular Posts */}
           <Card className="mt-6">
@@ -81,7 +84,7 @@ export default async function AnalyticsPage() {
                           {index + 1}
                         </span>
                         <Link
-                          href={`/admin/posts/${post.id}`}
+                          href={`/dashboard/posts/${post.id}`}
                           className="font-medium hover:underline"
                         >
                           {post.title}

@@ -106,6 +106,41 @@ export const analyticsCache = {
   async invalidatePostAnalytics(postId: string): Promise<void> {
     await cacheService.del(`${CACHE_KEYS.ANALYTICS}:post:${postId}`);
   },
+
+  /**
+   * Get cached views over time
+   */
+  async getCachedViewsOverTime(days: number): Promise<Array<{ date: string; views: number }> | null> {
+    return cacheService.get(`${CACHE_KEYS.ANALYTICS}:views-over-time:${days}`);
+  },
+
+  /**
+   * Set cached views over time
+   */
+  async setCachedViewsOverTime(days: number, data: Array<{ date: string; views: number }>): Promise<void> {
+    await cacheService.set(`${CACHE_KEYS.ANALYTICS}:views-over-time:${days}`, data, CACHE_TTL.ANALYTICS);
+  },
+
+  /**
+   * Get cached posts by locale
+   */
+  async getCachedPostsByLocale(): Promise<Array<{ locale: string; count: number }> | null> {
+    return cacheService.get(`${CACHE_KEYS.ANALYTICS}:posts-by-locale`);
+  },
+
+  /**
+   * Set cached posts by locale
+   */
+  async setCachedPostsByLocale(data: Array<{ locale: string; count: number }>): Promise<void> {
+    await cacheService.set(`${CACHE_KEYS.ANALYTICS}:posts-by-locale`, data, CACHE_TTL.ANALYTICS);
+  },
+
+  /**
+   * Invalidate all analytics cache
+   */
+  async invalidateAll(): Promise<void> {
+    await cacheService.invalidatePattern(`${CACHE_KEYS.ANALYTICS}:*`);
+  },
 };
 
 // Types for analytics data

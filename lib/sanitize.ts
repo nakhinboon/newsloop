@@ -50,34 +50,106 @@ const ALLOWED_ATTRIBUTES: Record<string, Set<string>> = {
 
 // Dangerous patterns to remove
 const DANGEROUS_PATTERNS = [
-  // Script tags and content
+  // Script tags and content (including self-closing and malformed)
   /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-  // Event handlers
+  /<script\b[^>]*\/?>/gi,
+  
+  // Event handlers (on* attributes) - multiple formats
   /\s*on\w+\s*=\s*["'][^"']*["']/gi,
   /\s*on\w+\s*=\s*[^\s>]+/gi,
-  // JavaScript URLs
+  // HTML entity encoded event handlers (&#111;&#110; = on)
+  /\s*&#\d+;*\s*&#\d+;*\w*\s*=\s*["'][^"']*["']/gi,
+  
+  // JavaScript URLs (including encoded variations)
   /javascript\s*:/gi,
+  /&#0*106;?&#0*97;?&#0*118;?&#0*97;?&#0*115;?&#0*99;?&#0*114;?&#0*105;?&#0*112;?&#0*116;?&#0*58;?/gi, // HTML entity encoded "javascript:"
+  /\x00javascript:/gi, // Null byte injection
+  
   // Data URLs (except images)
   /data\s*:\s*(?!image\/)/gi,
+  
   // VBScript
   /vbscript\s*:/gi,
-  // Expression (IE)
+  
+  // Expression (IE CSS)
   /expression\s*\(/gi,
+  
+  // CSS behavior and binding (IE/Firefox)
+  /behavior\s*:/gi,
+  /-moz-binding\s*:/gi,
+  
   // Style tags
   /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
+  /<style\b[^>]*\/?>/gi,
+  
+  // SVG tags (can contain scripts and event handlers)
+  /<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi,
+  /<svg\b[^>]*\/?>/gi,
+  
+  // MathML tags (can be used for XSS)
+  /<math\b[^<]*(?:(?!<\/math>)<[^<]*)*<\/math>/gi,
+  /<math\b[^>]*\/?>/gi,
+  
   // Object/embed/iframe tags
-  /<object\b[^>]*>.*?<\/object>/gi,
-  /<embed\b[^>]*>/gi,
-  /<iframe\b[^>]*>.*?<\/iframe>/gi,
+  /<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi,
+  /<object\b[^>]*\/?>/gi,
+  /<embed\b[^>]*\/?>/gi,
+  /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
+  /<iframe\b[^>]*\/?>/gi,
+  
+  // Applet tags (Java)
+  /<applet\b[^<]*(?:(?!<\/applet>)<[^<]*)*<\/applet>/gi,
+  /<applet\b[^>]*\/?>/gi,
+  
+  // Frame/frameset tags
+  /<frame\b[^>]*\/?>/gi,
+  /<frameset\b[^<]*(?:(?!<\/frameset>)<[^<]*)*<\/frameset>/gi,
+  
   // Form elements
-  /<form\b[^>]*>.*?<\/form>/gi,
-  /<input\b[^>]*>/gi,
-  /<button\b[^>]*>.*?<\/button>/gi,
-  // Meta and link tags
-  /<meta\b[^>]*>/gi,
-  /<link\b[^>]*>/gi,
-  // Base tag
-  /<base\b[^>]*>/gi,
+  /<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi,
+  /<form\b[^>]*\/?>/gi,
+  /<input\b[^>]*\/?>/gi,
+  /<button\b[^<]*(?:(?!<\/button>)<[^<]*)*<\/button>/gi,
+  /<button\b[^>]*\/?>/gi,
+  /<textarea\b[^<]*(?:(?!<\/textarea>)<[^<]*)*<\/textarea>/gi,
+  /<select\b[^<]*(?:(?!<\/select>)<[^<]*)*<\/select>/gi,
+  
+  // Meta, link, and base tags
+  /<meta\b[^>]*\/?>/gi,
+  /<link\b[^>]*\/?>/gi,
+  /<base\b[^>]*\/?>/gi,
+  
+  // Template tags (can bypass sanitizers)
+  /<template\b[^<]*(?:(?!<\/template>)<[^<]*)*<\/template>/gi,
+  /<template\b[^>]*\/?>/gi,
+  
+  // XML processing instructions
+  /<\?xml\b[^>]*\?>/gi,
+  /<xsl:\w+\b[^>]*\/?>/gi,
+  
+  // Noscript tags (can be used for XSS in some contexts)
+  /<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi,
+  
+  // Audio/video tags (can have event handlers)
+  /<audio\b[^<]*(?:(?!<\/audio>)<[^<]*)*<\/audio>/gi,
+  /<video\b[^<]*(?:(?!<\/video>)<[^<]*)*<\/video>/gi,
+  /<source\b[^>]*\/?>/gi,
+  /<track\b[^>]*\/?>/gi,
+  
+  // Legacy/deprecated dangerous tags
+  /<marquee\b[^<]*(?:(?!<\/marquee>)<[^<]*)*<\/marquee>/gi,
+  /<bgsound\b[^>]*\/?>/gi,
+  /<blink\b[^<]*(?:(?!<\/blink>)<[^<]*)*<\/blink>/gi,
+  
+  // Layer tags (Netscape)
+  /<layer\b[^<]*(?:(?!<\/layer>)<[^<]*)*<\/layer>/gi,
+  /<ilayer\b[^<]*(?:(?!<\/ilayer>)<[^<]*)*<\/ilayer>/gi,
+  
+  // Keygen tag
+  /<keygen\b[^>]*\/?>/gi,
+  
+  // Isindex tag (deprecated)
+  /<isindex\b[^>]*\/?>/gi,
 ];
 
 /**
@@ -140,10 +212,22 @@ export function sanitizeAttributeValue(tagName: string, attrName: string, value:
   
   // Check style attribute for dangerous patterns
   if (attr === 'style') {
-    // Remove expression() and url() with javascript
-    let sanitizedStyle = value
-      .replace(/expression\s*\([^)]*\)/gi, '')
-      .replace(/url\s*\(\s*["']?\s*javascript:[^)]*\)/gi, '');
+    // Remove expression() - IE CSS expression
+    let sanitizedStyle = value.replace(/expression\s*\([^)]*\)/gi, '');
+    // Remove url() with javascript
+    sanitizedStyle = sanitizedStyle.replace(/url\s*\(\s*["']?\s*javascript:[^)]*\)/gi, '');
+    // Remove url() with vbscript
+    sanitizedStyle = sanitizedStyle.replace(/url\s*\(\s*["']?\s*vbscript:[^)]*\)/gi, '');
+    // Remove url() with data: (except images)
+    sanitizedStyle = sanitizedStyle.replace(/url\s*\(\s*["']?\s*data:(?!image\/)[^)]*\)/gi, '');
+    // Remove behavior property (IE)
+    sanitizedStyle = sanitizedStyle.replace(/behavior\s*:[^;]*(;|$)/gi, '');
+    // Remove -moz-binding (Firefox)
+    sanitizedStyle = sanitizedStyle.replace(/-moz-binding\s*:[^;]*(;|$)/gi, '');
+    // Remove @import
+    sanitizedStyle = sanitizedStyle.replace(/@import\s+[^;]*(;|$)/gi, '');
+    // Remove position:fixed/absolute with negative values (clickjacking)
+    // Note: This is a conservative approach; may need adjustment based on use case
     return sanitizedStyle;
   }
   
@@ -170,7 +254,7 @@ export function removeDangerousPatterns(html: string): string {
 function escapeAttributeValue(value: string): string {
   // First, decode any existing HTML entities to normalize the input
   // Then re-encode to ensure consistent output
-  let decoded = value
+  const decoded = value
     .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&lt;/g, '<')
@@ -184,47 +268,6 @@ function escapeAttributeValue(value: string): string {
     .replace(/>/g, '&gt;');
 }
 
-/**
- * Parse HTML tag with attributes, handling edge cases like > in attribute values
- */
-function parseTag(tagString: string): { tagName: string; attributes: Map<string, string>; selfClosing: boolean } | null {
-  // Remove < and > from the tag string
-  const trimmed = tagString.trim();
-  if (!trimmed.startsWith('<') || !trimmed.endsWith('>')) {
-    return null;
-  }
-  
-  const inner = trimmed.slice(1, -1).trim();
-  if (!inner) return null;
-  
-  // Check for closing tag
-  if (inner.startsWith('/')) {
-    const tagName = inner.slice(1).trim().toLowerCase();
-    return { tagName, attributes: new Map(), selfClosing: false };
-  }
-  
-  // Check for self-closing
-  const selfClosing = inner.endsWith('/');
-  const content = selfClosing ? inner.slice(0, -1).trim() : inner;
-  
-  // Extract tag name
-  const spaceIndex = content.search(/\s/);
-  const tagName = (spaceIndex === -1 ? content : content.slice(0, spaceIndex)).toLowerCase();
-  const attrString = spaceIndex === -1 ? '' : content.slice(spaceIndex);
-  
-  // Parse attributes
-  const attributes = new Map<string, string>();
-  const attrRegex = /([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s]+))/gi;
-  let match;
-  
-  while ((match = attrRegex.exec(attrString)) !== null) {
-    const name = match[1].toLowerCase();
-    const value = match[2] ?? match[3] ?? match[4] ?? '';
-    attributes.set(name, value);
-  }
-  
-  return { tagName, attributes, selfClosing };
-}
 
 /**
  * Sanitize HTML content to prevent XSS attacks
@@ -306,7 +349,7 @@ export function containsDangerousContent(html: string): boolean {
   // Check for script tags
   if (/<script\b/i.test(html)) return true;
   
-  // Check for event handlers
+  // Check for event handlers (on* attributes)
   if (/\s+on\w+\s*=/i.test(html)) return true;
   
   // Check for javascript: URLs
@@ -318,14 +361,56 @@ export function containsDangerousContent(html: string): boolean {
   // Check for dangerous data: URLs
   if (/data\s*:\s*(?!image\/)/i.test(html)) return true;
   
-  // Check for expression()
+  // Check for expression() - IE CSS
   if (/expression\s*\(/i.test(html)) return true;
+  
+  // Check for behavior: - IE CSS
+  if (/behavior\s*:/i.test(html)) return true;
+  
+  // Check for -moz-binding - Firefox
+  if (/-moz-binding\s*:/i.test(html)) return true;
   
   // Check for style tags
   if (/<style\b/i.test(html)) return true;
   
   // Check for iframe/object/embed
   if (/<(iframe|object|embed)\b/i.test(html)) return true;
+  
+  // Check for SVG tags (can contain scripts)
+  if (/<svg\b/i.test(html)) return true;
+  
+  // Check for MathML tags
+  if (/<math\b/i.test(html)) return true;
+  
+  // Check for template tags
+  if (/<template\b/i.test(html)) return true;
+  
+  // Check for form elements
+  if (/<(form|input|button|textarea|select)\b/i.test(html)) return true;
+  
+  // Check for applet tags
+  if (/<applet\b/i.test(html)) return true;
+  
+  // Check for frame/frameset tags
+  if (/<(frame|frameset)\b/i.test(html)) return true;
+  
+  // Check for meta/link/base tags
+  if (/<(meta|link|base)\b/i.test(html)) return true;
+  
+  // Check for audio/video tags
+  if (/<(audio|video|source|track)\b/i.test(html)) return true;
+  
+  // Check for XML processing instructions
+  if (/<\?xml\b/i.test(html)) return true;
+  
+  // Check for XSL tags
+  if (/<xsl:/i.test(html)) return true;
+  
+  // Check for noscript tags
+  if (/<noscript\b/i.test(html)) return true;
+  
+  // Check for legacy dangerous tags
+  if (/<(marquee|bgsound|blink|layer|ilayer|keygen|isindex)\b/i.test(html)) return true;
   
   return false;
 }

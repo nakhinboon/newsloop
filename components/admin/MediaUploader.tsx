@@ -30,16 +30,58 @@ export function MediaUploader() {
     setIsDragging(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     
+    // Handle files dropped from file system
     const files = Array.from(e.dataTransfer.files).filter((file) =>
       file.type.startsWith('image/')
     );
     
     if (files.length > 0) {
       setSelectedFiles((prev) => [...prev, ...files]);
+      return;
+    }
+
+    // Handle images dropped from external sources (browser, other apps)
+    const items = e.dataTransfer.items;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      
+      // Handle image file from DataTransferItem
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) {
+          setSelectedFiles((prev) => [...prev, file]);
+        }
+      }
+      // Handle image URL (dragged from browser)
+      else if (item.kind === 'string' && item.type === 'text/uri-list') {
+        item.getAsString(async (url) => {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Failed to fetch image');
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType?.startsWith('image/')) {
+              toast.error('URL does not point to an image');
+              return;
+            }
+            
+            const blob = await response.blob();
+            const filename = url.split('/').pop()?.split('?')[0] || 'image';
+            const extension = contentType.split('/')[1] || 'png';
+            const finalFilename = filename.includes('.') ? filename : `${filename}.${extension}`;
+            
+            const file = new File([blob], finalFilename, { type: contentType });
+            setSelectedFiles((prev) => [...prev, file]);
+            toast.success('Image loaded from URL');
+          } catch {
+            toast.error('Failed to load image from URL');
+          }
+        });
+      }
     }
   }, []);
 

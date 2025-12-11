@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -33,7 +33,8 @@ import {
 } from '@/components/ui/table';
 import { FolderPicker } from './FolderPicker';
 import { FolderCard } from './FolderCard';
-import { Copy, Trash2, ExternalLink, ChevronLeft, ChevronRight, Search, FolderInput, Home } from 'lucide-react';
+import { Copy, Trash2, ExternalLink, ChevronLeft, ChevronRight, Search, FolderInput, Home, Loader2 } from 'lucide-react';
+import { MediaContextMenu } from './MediaContextMenu';
 import type { Media } from '@/lib/generated/prisma';
 import Link from 'next/link';
 
@@ -83,11 +84,15 @@ export function MediaGrid({
   const [isMoving, setIsMoving] = useState(false);
   const [moveFolderId, setMoveFolderId] = useState<string | null>(null);
   const [draggedMediaId, setDraggedMediaId] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync state with props
   useEffect(() => {
     setSearchInput(search);
     setSelectedFolderId(folderId ?? null);
+    setIsSearching(false);
   }, [search, folderId]);
 
   // Set moveFolderId when selecting media
@@ -97,6 +102,43 @@ export function MediaGrid({
     }
   }, [selectedMedia]);
 
+  // Debounced search - 500ms for better UX
+  useEffect(() => {
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Don't search if input matches current search
+    if (searchInput === search) {
+      setIsSearching(false);
+      return;
+    }
+
+    // Show searching indicator
+    setIsSearching(true);
+
+    // Set new timer - reduced to 500ms for snappier feel
+    debounceTimerRef.current = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (searchInput) {
+        params.set('search', searchInput);
+      }
+      if (selectedFolderId) {
+        params.set('folderId', selectedFolderId);
+      }
+      params.set('page', '1');
+      router.push(`/dashboard/media?${params.toString()}`);
+    }, 500);
+
+    // Cleanup
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchInput, search, selectedFolderId, router]);
+
   // Build URL with filters
   const buildUrl = (params: { page?: number; search?: string; folderId?: string | null }) => {
     const url = new URLSearchParams();
@@ -105,11 +147,6 @@ export function MediaGrid({
     if (params.folderId) url.set('folderId', params.folderId);
     const queryString = url.toString();
     return `/dashboard/media${queryString ? `?${queryString}` : ''}`;
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push(buildUrl({ search: searchInput, folderId: selectedFolderId ?? undefined }));
   };
 
   const handleFolderChange = (newFolderId: string | null) => {
@@ -219,18 +256,21 @@ export function MediaGrid({
     <>
       {/* Search and Filter Bar */}
       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <form onSubmit={handleSearch} className="flex gap-2 flex-1 max-w-sm">
+        <div className="flex gap-2 flex-1 max-w-sm">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+            {isSearching ? (
+              <Loader2 className="absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-primary animate-spin" />
+            ) : (
+              <Search className="absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+            )}
             <Input
-              placeholder="Search by filename..."
+              placeholder="ค้นหา..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-8 h-8 text-xs"
+              className={`pl-8 h-8 text-xs ${isSearching ? 'border-primary' : ''}`}
             />
           </div>
-          <Button type="submit" variant="secondary" size="sm" className="h-8 text-xs">Search</Button>
-        </form>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Folder:</span>
           <div className="w-40">
@@ -304,32 +344,33 @@ export function MediaGrid({
               
               {/* Media Cards */}
               {items.map((media) => (
-                <Card
-                  key={media.id}
-                  className={`cursor-pointer overflow-hidden transition-shadow hover:shadow-md ${
-                    draggedMediaId === media.id ? 'opacity-50' : ''
-                  }`}
-                  onClick={() => setSelectedMedia(media)}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, media.id)}
-                  onDragEnd={handleDragEnd}
-                >
-                  <div className="aspect-video relative">
-                    <Image
-                      src={media.thumbnailUrl || media.url}
-                      alt={media.filename}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                    />
-                  </div>
-                  <CardContent className="px-2 pb-2 pt-1.5">
-                    <p className="truncate text-xs font-medium">{media.filename}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {formatFileSize(media.size)}
-                    </p>
-                  </CardContent>
-                </Card>
+                <MediaContextMenu key={media.id} media={media}>
+                  <Card
+                    className={`cursor-pointer overflow-hidden transition-shadow hover:shadow-md p-0 ${
+                      draggedMediaId === media.id ? 'opacity-50' : ''
+                    }`}
+                    onClick={() => setSelectedMedia(media)}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, media.id)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <div className="aspect-video relative">
+                      <Image
+                        src={media.thumbnailUrl || media.url}
+                        alt={media.filename}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                      />
+                    </div>
+                    <CardContent className="px-2 pb-2 pt-1.5">
+                      <p className="truncate text-xs font-medium">{media.filename}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {formatFileSize(media.size)}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </MediaContextMenu>
               ))}
             </div>
           ) : (
@@ -347,27 +388,28 @@ export function MediaGrid({
                 </TableHeader>
                 <TableBody>
                   {items.map((media) => (
-                    <TableRow
-                      key={media.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => setSelectedMedia(media)}
-                    >
-                      <TableCell>
-                        <div className="relative h-10 w-10 overflow-hidden rounded-md bg-muted">
-                          <Image
-                            src={media.thumbnailUrl || media.url}
-                            alt={media.filename}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{media.filename}</TableCell>
-                      <TableCell>{formatFileSize(media.size)}</TableCell>
-                      <TableCell>{media.mimeType}</TableCell>
-                      <TableCell>{media.folder?.name || '-'}</TableCell>
-                      <TableCell>{new Date(media.uploadedAt).toLocaleDateString()}</TableCell>
-                    </TableRow>
+                    <MediaContextMenu key={media.id} media={media}>
+                      <TableRow
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => setSelectedMedia(media)}
+                      >
+                        <TableCell>
+                          <div className="relative h-10 w-10 overflow-hidden rounded-md bg-muted">
+                            <Image
+                              src={media.thumbnailUrl || media.url}
+                              alt={media.filename}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">{media.filename}</TableCell>
+                        <TableCell>{formatFileSize(media.size)}</TableCell>
+                        <TableCell>{media.mimeType}</TableCell>
+                        <TableCell>{media.folder?.name || '-'}</TableCell>
+                        <TableCell>{new Date(media.uploadedAt).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    </MediaContextMenu>
                   ))}
                 </TableBody>
               </Table>

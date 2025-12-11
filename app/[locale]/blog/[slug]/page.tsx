@@ -8,6 +8,7 @@ import { PostContent } from "@/components/PostContent";
 import { RelatedPosts } from "@/components/RelatedPosts";
 import { PostTags } from "@/components/PostTags";
 import { LocaleFallbackNotice } from "@/components/LocaleFallbackNotice";
+import { PageViewTracker } from "@/components/PageViewTracker";
 import { generatePostMetadata } from "@/lib/seo";
 import { ArticleJsonLd } from "@/components/JsonLd";
 import Image from "next/image";
@@ -81,6 +82,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <>
       {/* JSON-LD Structured Data - Requirements: 6.2 */}
       <ArticleJsonLd post={post} locale={validLocale} />
+
+      {/* Track page view */}
+      <PageViewTracker postId={post.id} />
 
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Fallback Notice */}

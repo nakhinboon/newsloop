@@ -1118,6 +1118,17 @@ describe("Property 8 & 10: Search Functionality", () => {
     status: fc.constantFrom("draft", "scheduled", "published") as fc.Arbitrary<"draft" | "scheduled" | "published">,
   });
 
+  // Generate posts with unique slugs to avoid ambiguity when finding original posts
+  const postsWithUniqueSlugsArbitrary = fc
+    .array(postArbitrary, { minLength: 0, maxLength: 50 })
+    .map((posts) => {
+      // Ensure unique slugs by appending index
+      return posts.map((post, index) => ({
+        ...post,
+        slug: `${post.slug}-${index}`,
+      }));
+    });
+
   /**
    * Property 8: Search returns matching posts
    * For any non-empty search query Q and result set R, every post in R SHALL contain Q
@@ -1127,7 +1138,7 @@ describe("Property 8 & 10: Search Functionality", () => {
     it("every post in search results contains the query in title, content, or tags (case-insensitive)", () => {
       fc.assert(
         fc.property(
-          fc.array(postArbitrary, { minLength: 0, maxLength: 50 }),
+          postsWithUniqueSlugsArbitrary,
           // Generate non-empty, non-whitespace queries
           fc.string({ minLength: 1, maxLength: 30 }).filter((q) => q.trim().length > 0),
           (posts, query) => {

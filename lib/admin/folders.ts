@@ -118,12 +118,25 @@ export const folderService = {
       );
     }
 
-    // If force delete, unassign media from folder first
+    // If force delete, delete all media in folder first
     if (force && folder._count.media > 0) {
-      await prisma.media.updateMany({
+      // Import mediaService dynamically to avoid circular dependency
+      const { mediaService } = await import('./media');
+      
+      // Get all media in folder
+      const mediaInFolder = await prisma.media.findMany({
         where: { folderId: id },
-        data: { folderId: null },
+        select: { id: true },
       });
+
+      // Delete each media (this also deletes from ImageKit)
+      for (const media of mediaInFolder) {
+        try {
+          await mediaService.deleteMedia(media.id, true);
+        } catch (error) {
+          console.error(`Failed to delete media ${media.id}:`, error);
+        }
+      }
     }
 
     await prisma.mediaFolder.delete({ where: { id } });

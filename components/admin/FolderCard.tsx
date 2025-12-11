@@ -19,6 +19,7 @@ interface FolderCardProps {
   isSelected?: boolean;
   onClick: () => void;
   onDrop?: (mediaId: string) => void;
+  onFileDrop?: (files: File[]) => void;
   onDelete?: () => void;
   onRename?: () => void;
 }
@@ -33,6 +34,7 @@ export function FolderCard({
   isSelected = false,
   onClick,
   onDrop,
+  onFileDrop,
   onDelete,
   onRename,
 }: FolderCardProps) {
@@ -55,9 +57,19 @@ export function FolderCard({
     e.stopPropagation();
     setIsDragOver(false);
 
+    // Handle media ID drop (internal drag)
     const mediaId = e.dataTransfer.getData('mediaId');
     if (mediaId && onDrop) {
       onDrop(mediaId);
+      return;
+    }
+
+    // Handle file drop from external sources
+    const files = Array.from(e.dataTransfer.files).filter((file) =>
+      file.type.startsWith('image/')
+    );
+    if (files.length > 0 && onFileDrop) {
+      onFileDrop(files);
     }
   };
 
@@ -71,6 +83,7 @@ export function FolderCard({
 
   return (
     <Card
+      data-folder-card
       className={cn(
         'cursor-pointer overflow-hidden transition-all hover:shadow-md border p-3',
         isSelected && 'ring-2 ring-primary border-primary',

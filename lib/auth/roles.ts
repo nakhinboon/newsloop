@@ -30,8 +30,8 @@ export function hasMinimumRole(userRole: Role | null | undefined, requiredRole: 
 function getEffectiveRole(user: any): Role | null {
   if (!user) return null;
 
-  // Check for admin override via environment variable
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  // Check for admin override via environment variable (server-side only)
+  const adminEmail = process.env.ADMIN_EMAIL;
   if (adminEmail && user.emailAddresses?.some((e: any) => e.emailAddress === adminEmail)) {
     return 'admin';
   }

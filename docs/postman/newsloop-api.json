@@ -1,0 +1,2200 @@
+{
+  "info": {
+    "_postman_id": "8f34a59f-6761-4a1c-b617-1f39826e7f28",
+    "name": "NewsLoop API",
+    "description": "# NewsLoop API Documentation\n\nNewsLoop is a multilingual blog/CMS with public-facing content and an admin dashboard.\n\n## Authentication\n\nAdmin endpoints require a Clerk authentication token. Set the `authToken` environment variable with your Bearer token.\n\n### Getting an Auth Token\n\n1. Sign in to the NewsLoop dashboard\n2. Open browser developer tools\n3. Find the Clerk session token in cookies or network requests\n4. Copy the token and set it as the `authToken` variable\n\n## Rate Limiting\n\nAdmin endpoints are rate limited:\n- Standard admin endpoints: 100 requests per minute\n- Upload endpoints: 10 requests per minute\n\n## Roles\n\n- **Admin**: Full access including user management\n- **Editor**: Posts, media, categories, tags (no user management)\n\n## Error Responses\n\nAll endpoints return consistent error responses:\n\n```json\n{\n  \"error\": \"Error message description\"\n}\n```\n\nCommon HTTP status codes:\n- 400: Validation error\n- 401: Authentication required\n- 403: Insufficient permissions\n- 404: Resource not found\n- 405: Method not allowed\n- 429: Rate limit exceeded\n- 500: Server error",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Public API",
+      "description": "Public endpoints for fetching published content. No authentication required.",
+      "item": [
+        {
+          "name": "Get Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?locale=en&limit=20&offset=0&featured=false&category=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "locale",
+                  "value": "en",
+                  "description": "Filter by locale (en, es, fr, th)"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Number of posts (default: 20, max: 50)"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Pagination offset"
+                },
+                {
+                  "key": "featured",
+                  "value": "false",
+                  "description": "Filter featured posts only",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "",
+                  "description": "Filter by category slug",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get published posts with pagination and filtering options."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/posts?locale=en&limit=20&offset=0&featured=false&category=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "posts"
+                  ],
+                  "query": [
+                    {
+                      "key": "locale",
+                      "value": "en",
+                      "description": "Filter by locale (en, es, fr, th)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Number of posts (default: 20, max: 50)"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0",
+                      "description": "Pagination offset"
+                    },
+                    {
+                      "key": "featured",
+                      "value": "false",
+                      "description": "Filter featured posts only",
+                      "disabled": true
+                    },
+                    {
+                      "key": "category",
+                      "value": "",
+                      "description": "Filter by category slug",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get published posts with pagination and filtering options."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"posts\": [\n    {\n      \"id\": \"clx123abc\",\n      \"slug\": \"example-post\",\n      \"locale\": \"en\",\n      \"title\": \"Example Post Title\",\n      \"excerpt\": \"This is an example post excerpt...\",\n      \"publishedAt\": \"2025-12-01T10:00:00.000Z\",\n      \"readingTime\": 5,\n      \"featured\": false,\n      \"author\": {\n        \"name\": \"John Doe\",\n        \"avatar\": \"https://example.com/avatar.jpg\"\n      },\n      \"category\": {\n        \"name\": \"Technology\",\n        \"slug\": \"technology\"\n      },\n      \"tags\": [\n        {\n          \"name\": \"News\",\n          \"slug\": \"news\"\n        }\n      ],\n      \"image\": \"https://ik.imagekit.io/example/image.jpg\",\n      \"thumbnailUrl\": \"https://ik.imagekit.io/example/image_thumb.jpg\"\n    }\n  ],\n  \"total\": 100,\n  \"limit\": 20,\n  \"offset\": 0,\n  \"hasMore\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Validation Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/posts?locale=en&limit=20&offset=0&featured=false&category=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "posts"
+                  ],
+                  "query": [
+                    {
+                      "key": "locale",
+                      "value": "en",
+                      "description": "Filter by locale (en, es, fr, th)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Number of posts (default: 20, max: 50)"
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0",
+                      "description": "Pagination offset"
+                    },
+                    {
+                      "key": "featured",
+                      "value": "false",
+                      "description": "Filter featured posts only",
+                      "disabled": true
+                    },
+                    {
+                      "key": "category",
+                      "value": "",
+                      "description": "Filter by category slug",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get published posts with pagination and filtering options."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Validation failed\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Get Featured Posts (Homepage)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/featured",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "featured"
+              ]
+            },
+            "description": "Get posts organized for BBC-style homepage sections including hero, top stories, must read, and more."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/posts/featured",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "posts",
+                    "featured"
+                  ]
+                },
+                "description": "Get posts organized for BBC-style homepage sections including hero, top stories, must read, and more."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"hero\": {\n    \"main\": {\n      \"id\": \"clx123\",\n      \"slug\": \"main-story\",\n      \"title\": \"Main Story\",\n      \"excerpt\": \"...\"\n    },\n    \"side\": [\n      {\n        \"id\": \"clx124\",\n        \"slug\": \"side-story\",\n        \"title\": \"Side Story\",\n        \"excerpt\": \"...\"\n      }\n    ]\n  },\n  \"topStories\": [\n    {\n      \"id\": \"clx125\",\n      \"slug\": \"top-story\",\n      \"title\": \"Top Story\",\n      \"excerpt\": \"...\"\n    }\n  ],\n  \"moreNews\": [\n    {\n      \"id\": \"clx126\",\n      \"slug\": \"more-news\",\n      \"title\": \"More News\",\n      \"excerpt\": \"...\"\n    }\n  ],\n  \"mustRead\": [\n    {\n      \"id\": \"clx127\",\n      \"slug\": \"must-read\",\n      \"title\": \"Must Read\",\n      \"excerpt\": \"...\"\n    }\n  ],\n  \"feature\": {\n    \"main\": null,\n    \"side\": null\n  },\n  \"video\": null,\n  \"bottomGrid\": [],\n  \"meta\": {\n    \"totalFeatured\": 5,\n    \"totalLatest\": 30,\n    \"totalPopular\": 10,\n    \"totalBreaking\": 3,\n    \"totalLongRead\": 2,\n    \"totalVideo\": 1\n  }\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Server Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/posts/featured",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "posts",
+                    "featured"
+                  ]
+                },
+                "description": "Get posts organized for BBC-style homepage sections including hero, top stories, must read, and more."
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Failed to fetch posts\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories?withPosts=false&limit=50&rootOnly=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "withPosts",
+                  "value": "false",
+                  "description": "Include posts in each category"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Max posts per category (when withPosts=true)"
+                },
+                {
+                  "key": "rootOnly",
+                  "value": "false",
+                  "description": "Only return root categories (no parent)"
+                }
+              ]
+            },
+            "description": "Get all categories with post counts and optional posts."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/categories?withPosts=false&limit=50&rootOnly=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categories"
+                  ],
+                  "query": [
+                    {
+                      "key": "withPosts",
+                      "value": "false",
+                      "description": "Include posts in each category"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "Max posts per category (when withPosts=true)"
+                    },
+                    {
+                      "key": "rootOnly",
+                      "value": "false",
+                      "description": "Only return root categories (no parent)"
+                    }
+                  ]
+                },
+                "description": "Get all categories with post counts and optional posts."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": \"cat123\",\n    \"name\": \"Technology\",\n    \"slug\": \"technology\",\n    \"description\": \"Tech news and updates\",\n    \"postCount\": 25\n  },\n  {\n    \"id\": \"cat124\",\n    \"name\": \"Business\",\n    \"slug\": \"business\",\n    \"description\": \"Business and finance news\",\n    \"postCount\": 18\n  }\n]",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Validation Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/categories?withPosts=false&limit=50&rootOnly=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categories"
+                  ],
+                  "query": [
+                    {
+                      "key": "withPosts",
+                      "value": "false",
+                      "description": "Include posts in each category"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "Max posts per category (when withPosts=true)"
+                    },
+                    {
+                      "key": "rootOnly",
+                      "value": "false",
+                      "description": "Only return root categories (no parent)"
+                    }
+                  ]
+                },
+                "description": "Get all categories with post counts and optional posts."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Validation failed\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin - Users",
+      "description": "User management endpoints. Requires admin role.",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "Clerk authentication token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
+            },
+            "description": "List all users with stats. Requires admin role."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "users"
+                  ]
+                },
+                "description": "List all users with stats. Requires admin role."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"users\": [\n    {\n      \"id\": \"user_123\",\n      \"email\": \"admin@example.com\",\n      \"firstName\": \"Admin\",\n      \"lastName\": \"User\",\n      \"role\": \"admin\",\n      \"imageUrl\": \"https://example.com/avatar.jpg\",\n      \"createdAt\": \"2025-01-01T00:00:00.000Z\",\n      \"postCount\": 15\n    }\n  ]\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "users"
+                  ]
+                },
+                "description": "List all users with stats. Requires admin role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Authentication required\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "users"
+                  ]
+                },
+                "description": "List all users with stats. Requires admin role."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Insufficient permissions\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin - Invitations",
+      "description": "User invitation management endpoints. Requires admin role.",
+      "item": [
+        {
+          "name": "List Invitations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "Clerk authentication token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "invitations"
+              ]
+            },
+            "description": "List all pending invitations. Requires admin role."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations"
+                  ]
+                },
+                "description": "List all pending invitations. Requires admin role."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"invitations\": [\n    {\n      \"id\": \"inv_123\",\n      \"email\": \"newuser@example.com\",\n      \"role\": \"editor\",\n      \"status\": \"pending\",\n      \"createdAt\": \"2025-12-01T00:00:00.000Z\",\n      \"expiresAt\": \"2025-12-08T00:00:00.000Z\"\n    }\n  ]\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations"
+                  ]
+                },
+                "description": "List all pending invitations. Requires admin role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Authentication required\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations"
+                  ]
+                },
+                "description": "List all pending invitations. Requires admin role."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Insufficient permissions\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Create Invitation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "Clerk authentication token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "invitations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"role\": \"editor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Create a new user invitation. Requires admin role."
+          },
+          "response": [
+            {
+              "name": "Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"role\": \"editor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "Create a new user invitation. Requires admin role."
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"invitation\": {\n    \"id\": \"inv_456\",\n    \"email\": \"newuser@example.com\",\n    \"role\": \"editor\",\n    \"status\": \"pending\",\n    \"createdAt\": \"2025-12-11T00:00:00.000Z\",\n    \"expiresAt\": \"2025-12-18T00:00:00.000Z\"\n  }\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Validation Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"role\": \"editor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "Create a new user invitation. Requires admin role."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Invalid email format\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Conflict",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"role\": \"editor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "Create a new user invitation. Requires admin role."
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"User already exists\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"role\": \"editor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "Create a new user invitation. Requires admin role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Authentication required\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"role\": \"editor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "Create a new user invitation. Requires admin role."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Insufficient permissions\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Delete Invitation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "Clerk authentication token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/invitations/{{invitationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "invitations",
+                "{{invitationId}}"
+              ]
+            },
+            "description": "Revoke a pending invitation. Requires admin role."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations/{{invitationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations",
+                    "{{invitationId}}"
+                  ]
+                },
+                "description": "Revoke a pending invitation. Requires admin role."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"success\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations/{{invitationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations",
+                    "{{invitationId}}"
+                  ]
+                },
+                "description": "Revoke a pending invitation. Requires admin role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Authentication required\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/invitations/{{invitationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "invitations",
+                    "{{invitationId}}"
+                  ]
+                },
+                "description": "Revoke a pending invitation. Requires admin role."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Insufficient permissions\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin - Media",
+      "description": "Media management endpoints. Requires editor role.",
+      "item": [
+        {
+          "name": "List Media",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "Clerk authentication token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/media?page=1&pageSize=20&search=&folderId=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "media"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page (max: 50)"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by filename",
+                  "disabled": true
+                },
+                {
+                  "key": "folderId",
+                  "value": "",
+                  "description": "Filter by folder ID",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List media files with pagination and filtering. Requires editor role."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media?page=1&pageSize=20&search=&folderId=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20",
+                      "description": "Items per page (max: 50)"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Search by filename",
+                      "disabled": true
+                    },
+                    {
+                      "key": "folderId",
+                      "value": "",
+                      "description": "Filter by folder ID",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "List media files with pagination and filtering. Requires editor role."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"media\": [\n    {\n      \"id\": \"media_123\",\n      \"filename\": \"hero-image.jpg\",\n      \"url\": \"https://ik.imagekit.io/newsloop/blog/hero-image.jpg\",\n      \"thumbnailUrl\": \"https://ik.imagekit.io/newsloop/blog/hero-image_thumb.jpg\",\n      \"mimeType\": \"image/jpeg\",\n      \"size\": 245678,\n      \"width\": 1920,\n      \"height\": 1080,\n      \"folderId\": null,\n      \"createdAt\": \"2025-12-01T00:00:00.000Z\"\n    }\n  ],\n  \"total\": 50,\n  \"page\": 1,\n  \"pageSize\": 20,\n  \"totalPages\": 3\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media?page=1&pageSize=20&search=&folderId=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20",
+                      "description": "Items per page (max: 50)"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Search by filename",
+                      "disabled": true
+                    },
+                    {
+                      "key": "folderId",
+                      "value": "",
+                      "description": "Filter by folder ID",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "List media files with pagination and filtering. Requires editor role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Authentication required\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media?page=1&pageSize=20&search=&folderId=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20",
+                      "description": "Items per page (max: 50)"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Search by filename",
+                      "disabled": true
+                    },
+                    {
+                      "key": "folderId",
+                      "value": "",
+                      "description": "Filter by folder ID",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "List media files with pagination and filtering. Requires editor role."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Insufficient permissions\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Upload Media",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "Clerk authentication token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/media/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "media",
+                "upload"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Image file to upload (jpg, png, gif, webp)"
+                },
+                {
+                  "key": "folderId",
+                  "type": "text",
+                  "value": "",
+                  "description": "Optional folder ID"
+                }
+              ]
+            },
+            "description": "Upload a media file. Requires editor role. Rate limited."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "upload"
+                  ]
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "description": "Image file to upload (jpg, png, gif, webp)"
+                    },
+                    {
+                      "key": "folderId",
+                      "type": "text",
+                      "value": "",
+                      "description": "Optional folder ID"
+                    }
+                  ]
+                },
+                "description": "Upload a media file. Requires editor role. Rate limited."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"id\": \"media_456\",\n  \"filename\": \"uploaded-image.jpg\",\n  \"url\": \"https://ik.imagekit.io/newsloop/blog/uploaded-image.jpg\",\n  \"thumbnailUrl\": \"https://ik.imagekit.io/newsloop/blog/uploaded-image_thumb.jpg\",\n  \"mimeType\": \"image/jpeg\",\n  \"size\": 123456,\n  \"width\": 1200,\n  \"height\": 800,\n  \"fileId\": \"ik_file_123\",\n  \"createdAt\": \"2025-12-11T00:00:00.000Z\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Bad Request",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "upload"
+                  ]
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "description": "Image file to upload (jpg, png, gif, webp)"
+                    },
+                    {
+                      "key": "folderId",
+                      "type": "text",
+                      "value": "",
+                      "description": "Optional folder ID"
+                    }
+                  ]
+                },
+                "description": "Upload a media file. Requires editor role. Rate limited."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"No file provided\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "upload"
+                  ]
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "description": "Image file to upload (jpg, png, gif, webp)"
+                    },
+                    {
+                      "key": "folderId",
+                      "type": "text",
+                      "value": "",
+                      "description": "Optional folder ID"
+                    }
+                  ]
+                },
+                "description": "Upload a media file. Requires editor role. Rate limited."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Authentication required\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "upload"
+                  ]
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "description": "Image file to upload (jpg, png, gif, webp)"
+                    },
+                    {
+                      "key": "folderId",
+                      "type": "text",
+                      "value": "",
+                      "description": "Optional folder ID"
+                    }
+                  ]
+                },
+                "description": "Upload a media file. Requires editor role. Rate limited."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Insufficient permissions\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Rate Limited",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "upload"
+                  ]
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "description": "Image file to upload (jpg, png, gif, webp)"
+                    },
+                    {
+                      "key": "folderId",
+                      "type": "text",
+                      "value": "",
+                      "description": "Optional folder ID"
+                    }
+                  ]
+                },
+                "description": "Upload a media file. Requires editor role. Rate limited."
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Too many requests\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Get Media by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "Clerk authentication token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/media/{{mediaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "media",
+                "{{mediaId}}"
+              ]
+            },
+            "description": "Get a single media item by ID. Requires editor role."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/{{mediaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "{{mediaId}}"
+                  ]
+                },
+                "description": "Get a single media item by ID. Requires editor role."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"id\": \"media_123\",\n  \"filename\": \"hero-image.jpg\",\n  \"url\": \"https://ik.imagekit.io/newsloop/blog/hero-image.jpg\",\n  \"thumbnailUrl\": \"https://ik.imagekit.io/newsloop/blog/hero-image_thumb.jpg\",\n  \"mimeType\": \"image/jpeg\",\n  \"size\": 245678,\n  \"width\": 1920,\n  \"height\": 1080,\n  \"folderId\": null,\n  \"fileId\": \"ik_file_123\",\n  \"createdAt\": \"2025-12-01T00:00:00.000Z\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/{{mediaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "{{mediaId}}"
+                  ]
+                },
+                "description": "Get a single media item by ID. Requires editor role."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Media not found\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/{{mediaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "{{mediaId}}"
+                  ]
+                },
+                "description": "Get a single media item by ID. Requires editor role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Authentication required\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/{{mediaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "{{mediaId}}"
+                  ]
+                },
+                "description": "Get a single media item by ID. Requires editor role."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Insufficient permissions\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        },
+        {
+          "name": "Delete Media",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "Clerk authentication token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/media/{{mediaId}}?force=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "media",
+                "{{mediaId}}"
+              ],
+              "query": [
+                {
+                  "key": "force",
+                  "value": "false",
+                  "description": "Force delete even if media is in use"
+                }
+              ]
+            },
+            "description": "Delete a media item. Requires editor role."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/{{mediaId}}?force=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "{{mediaId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "force",
+                      "value": "false",
+                      "description": "Force delete even if media is in use"
+                    }
+                  ]
+                },
+                "description": "Delete a media item. Requires editor role."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"success\": true\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/{{mediaId}}?force=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "{{mediaId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "force",
+                      "value": "false",
+                      "description": "Force delete even if media is in use"
+                    }
+                  ]
+                },
+                "description": "Delete a media item. Requires editor role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Authentication required\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/media/{{mediaId}}?force=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "media",
+                    "{{mediaId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "force",
+                      "value": "false",
+                      "description": "Force delete even if media is in use"
+                    }
+                  ]
+                },
+                "description": "Delete a media item. Requires editor role."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Insufficient permissions\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin - Tags",
+      "description": "Tag management endpoints. Requires editor role.",
+      "item": [
+        {
+          "name": "List Tags",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "Clerk authentication token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/tags",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "tags"
+              ]
+            },
+            "description": "List all tags. Requires editor role."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/tags",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "tags"
+                  ]
+                },
+                "description": "List all tags. Requires editor role."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": \"tag_123\",\n    \"name\": \"Breaking News\",\n    \"slug\": \"breaking-news\",\n    \"_count\": {\n      \"posts\": 15\n    }\n  },\n  {\n    \"id\": \"tag_124\",\n    \"name\": \"Technology\",\n    \"slug\": \"technology\",\n    \"_count\": {\n      \"posts\": 42\n    }\n  }\n]",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/tags",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "tags"
+                  ]
+                },
+                "description": "List all tags. Requires editor role."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Authentication required\"\n}",
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Clerk authentication token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/tags",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "tags"
+                  ]
+                },
+                "description": "List all tags. Requires editor role."
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": "{\n  \"error\": \"Insufficient permissions\"\n}",
+              "_postman_previewlanguage": "json"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "Base URL for the API. Change to production URL when needed."
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string",
+      "description": "Clerk authentication token (Bearer token)"
+    },
+    {
+      "key": "invitationId",
+      "value": "",
+      "type": "string",
+      "description": "Invitation ID for delete operations"
+    },
+    {
+      "key": "mediaId",
+      "value": "",
+      "type": "string",
+      "description": "Media ID for get/delete operations"
+    }
+  ]
+}

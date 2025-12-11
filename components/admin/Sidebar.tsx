@@ -55,10 +55,10 @@ function SidebarContent() {
   const pathname = usePathname();
   const { user } = useUser();
   const role = user?.publicMetadata?.role as string;
-  // Fallback for admin email override
-  const isAdminOverride = user?.emailAddresses?.some(e => e.emailAddress === process.env.NEXT_PUBLIC_ADMIN_EMAIL); 
   
-  const userRole = (role === 'admin' || isAdminOverride) ? 'admin' : 'editor';
+  // Role is determined server-side via lib/auth/roles.ts (including admin email override)
+  // Client-side only uses publicMetadata.role which is set by Clerk webhook
+  const userRole = role === 'admin' ? 'admin' : 'editor';
 
   const filteredItems = navItems.filter(item => item.roles.includes(userRole));
 

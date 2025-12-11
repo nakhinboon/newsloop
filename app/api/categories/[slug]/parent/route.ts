@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
+import { validateMethod } from "@/lib/security/headers";
 
+const ALLOWED_METHODS = ['GET'] as const;
+
+/**
+ * GET /api/categories/[slug]/parent - Get parent category info
+ * Requirements: 5.4 - Method validation
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(request, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
   try {
     const { slug } = await params;
 

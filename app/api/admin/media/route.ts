@@ -1,23 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { verifyEditorRole } from '@/lib/auth/roles';
 import { mediaService } from '@/lib/admin/media';
+import { applyRateLimit } from '@/lib/security/rate-limit';
+import { validateMethod, createUnauthorizedResponse, createForbiddenResponse } from '@/lib/security/headers';
+import {
+  mediaListQuerySchema,
+  validateQuery,
+  formatValidationError,
+  MAX_LIMIT,
+} from '@/lib/security/api-schemas';
+
+const ALLOWED_METHODS = ['GET'] as const;
 
 /**
  * GET /api/admin/media - List media with pagination, search, and folder filter
- * Requirements: 4.2, 4.4, 5.3
+ * Requirements: 1.1, 1.2, 4.1, 4.2, 4.3, 4.4, 5.3, 5.4, 8.1 - Rate limiting, role verification, method validation, and Zod validation applied
  */
 export async function GET(request: NextRequest) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(request, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Apply rate limiting for admin endpoints
+    const rateLimitResult = await applyRateLimit(request, 'ADMIN');
+    if (rateLimitResult) {
+      return rateLimitResult.response;
     }
 
+    // Verify editor role - Requirements: 1.1, 1.2, 1.4
+    await verifyEditorRole();
+
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const pageSize = parseInt(searchParams.get('pageSize') || '20', 10);
-    const search = searchParams.get('search');
-    const folderId = searchParams.get('folderId');
+    
+    // Validate query parameters with Zod schema - Requirements: 8.1, 4.3
+    const validation = validateQuery(searchParams, mediaListQuerySchema);
+    if (!validation.success) {
+      return NextResponse.json(formatValidationError(validation), { status: 400 });
+    }
+
+    const { page, pageSize, search, folderId } = validation.data!;
+    
+    // Enforce pagination limit - Requirements: 4.3
+    const enforcedPageSize = Math.min(pageSize, MAX_LIMIT);
 
     let result;
     
@@ -25,19 +49,27 @@ export async function GET(request: NextRequest) {
       result = await mediaService.searchMedia(
         search,
         page,
-        pageSize,
+        enforcedPageSize,
         folderId === 'null' ? null : folderId || undefined
       );
     } else {
       result = await mediaService.getAllMedia(
         page,
-        pageSize,
+        enforcedPageSize,
         folderId === 'null' ? null : folderId || undefined
       );
     }
 
     return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === 'Authentication required') {
+        return createUnauthorizedResponse();
+      }
+      if (error.message === 'Editor role required') {
+        return createForbiddenResponse();
+      }
+    }
     console.error('Failed to get media:', error);
     return NextResponse.json(
       { error: 'Failed to get media' },

@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 import cacheService, { CACHE_TTL } from '@/lib/cache/redis';
 import type { Prisma } from '@/lib/generated/prisma';
+import {
+  postsListQuerySchema,
+  validateQuery,
+  formatValidationError,
+  MAX_LIMIT,
+} from '@/lib/security/api-schemas';
+import { validateMethod } from '@/lib/security/headers';
 
 export const dynamic = 'force-dynamic';
 
-const MAX_LIMIT = 50;
-const DEFAULT_LIMIT = 20;
+const ALLOWED_METHODS = ['GET'] as const;
 
 /**
  * GET /api/posts - Public API for fetching published posts
@@ -17,17 +23,25 @@ const DEFAULT_LIMIT = 20;
  * - featured: Filter featured posts only
  * - category: Filter by category slug
  * - section: Get posts for specific homepage section
+ * Requirements: 4.3, 5.4, 8.1 - Pagination limit enforcement, method validation, Zod validation
  */
 export async function GET(request: NextRequest) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(request, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
   try {
     const { searchParams } = new URL(request.url);
-    const locale = searchParams.get('locale');
-    const limit = Math.min(parseInt(searchParams.get('limit') || String(DEFAULT_LIMIT), 10), MAX_LIMIT);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
-    const featured = searchParams.get('featured') === 'true';
-    const categorySlug = searchParams.get('category');
-    const section = searchParams.get('section');
+    
+    // Validate query parameters with Zod schema - Requirements: 8.1, 4.3
+    const validation = validateQuery(searchParams, postsListQuerySchema);
+    if (!validation.success) {
+      return NextResponse.json(formatValidationError(validation), { status: 400 });
+    }
 
+    const { locale, limit: requestedLimit, offset, featured, category: categorySlug, section } = validation.data!;
+    
+    // Enforce pagination limit - Requirements: 4.3
+    const limit = Math.min(requestedLimit, MAX_LIMIT);
     // Build cache key
     const cacheKey = `posts:public:${locale ?? 'all'}:${limit}:${offset}:${featured}:${categorySlug ?? 'all'}:${section ?? 'default'}`;
     

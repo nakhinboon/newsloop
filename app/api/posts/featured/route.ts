@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db/prisma';
 import { postCache } from '@/lib/cache/posts';
 import type { Prisma } from '@/lib/generated/prisma';
+import { validateMethod } from '@/lib/security/headers';
 
 export const dynamic = 'force-dynamic';
+
+const ALLOWED_METHODS = ['GET'] as const;
 
 // Post include for all queries
 const postInclude = {
@@ -56,8 +59,12 @@ function transformPost(post: PostWithRelations) {
  * - Bottom Grid: latest from different categories
  * 
  * ยืดหยุ่น: ถ้าไม่มีข้อมูลตาม criteria จะ fallback ไป latest
+ * Requirements: 5.4 - Method validation
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(request, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
   try {
     const cacheKey = 'posts:homepage:all';
     

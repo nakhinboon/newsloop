@@ -10,6 +10,23 @@ export interface PostFilters {
   search?: string;
 }
 
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
 export interface CreatePostInput {
   title: string;
   content: string;
@@ -68,6 +85,58 @@ export const adminPostService = {
    * Get all posts with optional filters
    */
   async getAllPosts(filters?: PostFilters): Promise<AdminPost[]> {
+    const where = this.buildWhereClause(filters);
+
+    return prisma.post.findMany({
+      where,
+      include: postInclude,
+      orderBy: { createdAt: 'desc' },
+    });
+  },
+
+  /**
+   * Get paginated posts with optional filters
+   */
+  async getPaginatedPosts(
+    filters?: PostFilters,
+    pagination?: PaginationParams
+  ): Promise<PaginatedResult<AdminPost>> {
+    const page = pagination?.page || 1;
+    const limit = pagination?.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const where = this.buildWhereClause(filters);
+
+    const [data, total] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        include: postInclude,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.post.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  },
+
+  /**
+   * Build where clause from filters
+   */
+  buildWhereClause(filters?: PostFilters): Prisma.PostWhereInput {
     const where: Prisma.PostWhereInput = {};
 
     if (filters?.status) {
@@ -89,11 +158,7 @@ export const adminPostService = {
       ];
     }
 
-    return prisma.post.findMany({
-      where,
-      include: postInclude,
-      orderBy: { createdAt: 'desc' },
-    });
+    return where;
   },
 
   /**

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { CategoryForm } from '@/components/admin/CategoryForm';
 import { CategoryTreeView } from '@/components/admin/CategoryTreeView';
+import { CategoryEditDialog } from '@/components/admin/CategoryEditDialog';
 import type { CategoryNode } from '@/lib/categories/tree';
 
 interface CategoriesClientProps {
@@ -23,52 +24,21 @@ export function CategoriesClient({
   moveCategory,
 }: CategoriesClientProps) {
   const [editingCategory, setEditingCategory] = useState<CategoryNode | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const handleEdit = (category: CategoryNode) => {
     setEditingCategory(category);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingCategory(null);
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    if (editingCategory) {
-      await updateCategory(formData);
-      setEditingCategory(null);
-    } else {
-      await createCategory(formData);
-    }
+    setEditDialogOpen(true);
   };
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
-      {/* Category Form */}
+      {/* Category Form - สำหรับสร้างใหม่เท่านั้น */}
       <div className="lg:col-span-1">
         <CategoryForm
-          onSubmit={handleSubmit}
-          initialData={
-            editingCategory
-              ? {
-                  id: editingCategory.id,
-                  name: editingCategory.name,
-                  slug: editingCategory.slug,
-                  description: editingCategory.description || undefined,
-                  parentId: editingCategory.parentId,
-                }
-              : undefined
-          }
+          onSubmit={createCategory}
           categories={categoryTree}
         />
-        {editingCategory && (
-          <button
-            type="button"
-            onClick={handleCancelEdit}
-            className="mt-2 w-full text-sm text-muted-foreground hover:text-foreground"
-          >
-            Cancel editing
-          </button>
-        )}
       </div>
 
       {/* Categories Tree View */}
@@ -81,6 +51,16 @@ export function CategoriesClient({
           onMove={moveCategory}
         />
       </div>
+
+      {/* Edit Dialog */}
+      <CategoryEditDialog
+        category={editingCategory}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSave={updateCategory}
+        categories={categoryTree}
+        allCategoriesFlat={allCategoriesFlat}
+      />
     </div>
   );
 }

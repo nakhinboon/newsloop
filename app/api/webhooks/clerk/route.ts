@@ -8,8 +8,18 @@ import {
   ClerkUserData,
   validateClerkUserData,
 } from '@/lib/admin/user-sync';
+import { validateMethod } from '@/lib/security/headers';
 
+const ALLOWED_METHODS = ['POST'] as const;
+
+/**
+ * POST /api/webhooks/clerk - Handle Clerk webhook events
+ * Requirements: 5.4, 7.4 - Method validation, webhook signature verification
+ */
 export async function POST(req: Request) {
+  // Validate HTTP method - Requirements: 5.4
+  const methodError = validateMethod(req, [...ALLOWED_METHODS]);
+  if (methodError) return methodError;
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
