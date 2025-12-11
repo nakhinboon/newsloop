@@ -23,12 +23,17 @@ const POSTS_PER_PAGE = 9;
 
 /**
  * Generate static params for all tags in all locales.
+ * Returns empty array if database unavailable - pages will be generated on-demand.
  */
 export async function generateStaticParams() {
-  const tags = await getAllTags();
-  return tags.map((tag) => ({
-    tag: tag.slug,
-  }));
+  try {
+    const tags = await getAllTags();
+    return tags.map((tag) => ({
+      tag: tag.slug,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 /**

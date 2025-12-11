@@ -16,10 +16,14 @@ interface CategoryPageProps {
 const POSTS_PER_PAGE = 20; // Increased to cover hero + list
 
 export async function generateStaticParams() {
-  const categories = await categoryService.getAllCategories();
-  return categories.map((category) => ({
-    category: category.slug,
-  }));
+  try {
+    const categories = await categoryService.getAllCategories();
+    return categories.map((category) => ({
+      category: category.slug,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({

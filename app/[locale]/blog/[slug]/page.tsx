@@ -19,17 +19,23 @@ interface BlogPostPageProps {
 
 /**
  * Generate static params for all posts in all locales.
+ * Returns empty array if database is unavailable (allows dynamic rendering).
  */
 export async function generateStaticParams() {
-  const posts = await getAllPosts();
-  const params: { locale: string; slug: string }[] = [];
+  try {
+    const posts = await getAllPosts();
+    const params: { locale: string; slug: string }[] = [];
 
-  for (const post of posts) {
-    // Generate params for default locale
-    params.push({ locale: defaultLocale, slug: post.slug });
+    for (const post of posts) {
+      // Generate params for default locale
+      params.push({ locale: defaultLocale, slug: post.slug });
+    }
+
+    return params;
+  } catch {
+    // Return empty array if database unavailable - pages will be generated on-demand
+    return [];
   }
-
-  return params;
 }
 
 /**
